@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scadenzario Audit</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#312e81">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%234f46e5'/%3E%3Cstop offset='1' stop-color='%23a855f7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='url(%23g)'/%3E%3Cpath d='M32 12 17 18.5v11.2c0 9.2 6.4 17 15 19.3 8.6-2.3 15-10.1 15-19.3V18.5Z' fill='none' stroke='white' stroke-width='4' stroke-linejoin='round'/%3E%3Cpath d='m25 31 5 5 9-9' fill='none' stroke='white' stroke-width='4.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f5fb; --card:#fff; --ink:#0f172a; --ink2:#475569; --ink3:#94a3b8; --line:#e6e8f0; --line2:#eef0f6;
+  --brand:#4f46e5; --brand2:#6366f1; --brandSoft:#eef0ff;
+  --ok:#10b981; --okSoft:#e7f8f1; --warn:#f59e0b; --warnSoft:#fff6e3; --bad:#ef4444; --badSoft:#fdecec; --info:#0ea5e9; --infoSoft:#e6f6fd; --vio:#8b5cf6; --vioSoft:#f2edff;
+  --r:16px; --sh:0 1px 2px rgba(15,23,42,.04),0 4px 16px rgba(15,23,42,.05); --sh2:0 20px 60px rgba(15,23,42,.18);
+  font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-size:14px}
+button,input,select,textarea{font:inherit;color:inherit}
+svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#app{display:grid;grid-template-columns:248px 1fr;min-height:100vh}
+/* sidebar */
+.sb{background:linear-gradient(180deg,#1e1b4b 0%,#272468 55%,#312e81 100%);color:#c7d2fe;padding:22px 16px;display:flex;flex-direction:column;gap:6px;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:12px;padding:4px 8px 22px}
+.logo{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#818cf8,#c084fc);display:grid;place-items:center;color:#fff;box-shadow:0 6px 20px rgba(129,140,248,.45)}
+.logo svg{width:22px;height:22px}
+.brand b{display:block;color:#fff;font-size:16px;letter-spacing:-.01em}
+.brand small{color:#a5b4fc;font-size:12px}
+.nav{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:12px;cursor:pointer;color:#c7d2fe;font-weight:600;border:0;background:none;width:100%;text-align:left;transition:.15s}
+.nav:hover{background:rgba(255,255,255,.07);color:#fff}
+.nav.on{background:rgba(255,255,255,.13);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.nav .cnt{margin-left:auto;background:#f43f5e;color:#fff;font-size:11px;padding:2px 7px;border-radius:99px}
+.sb .grow{flex:1}
+.sbbox{background:rgba(255,255,255,.07);border-radius:14px;padding:12px;font-size:12.5px;display:flex;flex-direction:column;gap:8px}
+.sbbox .row{display:flex;align-items:center;gap:8px}
+.sbbox select{background:rgba(255,255,255,.1);border:0;border-radius:8px;color:#fff;padding:6px 8px;width:100%}
+.sbbox select option{color:#000}
+.dot{width:8px;height:8px;border-radius:50%;flex:none}
+.sync-ok{background:#34d399;box-shadow:0 0 0 3px rgba(52,211,153,.2)} .sync-saving{background:#fbbf24;animation:pulse 1s infinite} .sync-err{background:#f87171} .sync-local{background:#94a3b8}
+@keyframes pulse{50%{opacity:.35}}
+.sblink{background:none;border:0;color:#a5b4fc;padding:0;cursor:pointer;text-decoration:underline;font-size:12px;text-align:left}
+/* main */
+main{min-width:0;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;gap:14px;padding:18px 28px;position:sticky;top:0;z-index:20;background:rgba(244,245,251,.85);backdrop-filter:blur(10px);border-bottom:1px solid transparent}
+.top h1{font-size:22px;margin:0;letter-spacing:-.02em;font-weight:800}
+.top .sub{color:var(--ink3);font-size:13px;font-weight:500}
+.search{margin-left:auto;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:0 12px;height:40px;width:300px;color:var(--ink3);transition:.15s}
+.search:focus-within{border-color:var(--brand2);box-shadow:0 0 0 4px var(--brandSoft)}
+.search input{border:0;outline:0;flex:1;background:none;color:var(--ink)}
+.btn{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:#fff;font-weight:600;cursor:pointer;white-space:nowrap;transition:.15s}
+.btn:hover{border-color:#cbd0e0;transform:translateY(-1px)}
+.btn.pri{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border:0;box-shadow:0 6px 18px rgba(79,70,229,.3)}
+.btn.pri:hover{box-shadow:0 8px 22px rgba(79,70,229,.4)}
+.btn.sm{height:32px;padding:0 11px;border-radius:10px;font-size:13px}
+.btn.ghost{background:none;border-color:transparent}
+.btn.ghost:hover{background:#eef0f6}
+.btn.danger{color:var(--bad)}
+.btn.danger:hover{background:var(--badSoft);border-color:#f8caca}
+.iconbtn{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;border:0;background:none;cursor:pointer;color:var(--ink2)}
+.iconbtn:hover{background:#eef0f6;color:var(--ink)}
+#view{padding:6px 28px 40px;min-width:0}
+.banner{margin:0 28px 6px;display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:14px;background:linear-gradient(135deg,#eef0ff,#f6efff);border:1px solid #dcdcfb;color:#3730a3}
+.banner.warn{background:var(--warnSoft);border-color:#fde3a7;color:#92400e}
+.banner p{margin:0;flex:1;line-height:1.45}
+/* cards */
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);border:1px solid var(--line2);padding:20px}
+.card h3{margin:0 0 14px;font-size:15px;display:flex;align-items:center;gap:8px;letter-spacing:-.01em}
+.card h3 .more{margin-left:auto;font-size:12.5px;color:var(--brand);font-weight:600;cursor:pointer;background:none;border:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+.grid3{display:grid;grid-template-columns:1.25fr 1fr;gap:18px;margin-top:18px}
+.hero{display:flex;align-items:flex-end;justify-content:space-between;margin:4px 0 18px}
+.hero h2{margin:0;font-size:26px;letter-spacing:-.03em;font-weight:800}
+.hero p{margin:4px 0 0;color:var(--ink2)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.kpi{position:relative;overflow:hidden;border-radius:var(--r);padding:18px 20px;color:#fff;cursor:pointer;transition:.2s;border:0;text-align:left}
+.kpi:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(15,23,42,.15)}
+.kpi .n{font-size:36px;font-weight:800;letter-spacing:-.03em;line-height:1.1;margin-top:8px}
+.kpi .l{font-weight:600;opacity:.95}
+.kpi .s{font-size:12.5px;opacity:.85;margin-top:2px}
+.kpi svg.bgi{position:absolute;right:-10px;bottom:-14px;width:96px;height:96px;opacity:.16;stroke-width:1.5}
+.k1{background:linear-gradient(135deg,#4f46e5,#7c3aed)} .k2{background:linear-gradient(135deg,#0891b2,#0ea5e9)} .k3{background:linear-gradient(135deg,#f59e0b,#f97316)} .k4{background:linear-gradient(135deg,#e11d48,#f43f5e)}
+/* lists */
+.li{display:flex;align-items:center;gap:14px;padding:11px 10px;border-radius:12px;cursor:pointer;transition:.12s}
+.li:hover{background:#f6f7fb}
+.li+.li{border-top:1px solid var(--line2)}
+.li:hover+.li{border-top-color:transparent}
+.datebox{width:50px;flex:none;text-align:center;border-radius:12px;background:var(--brandSoft);color:var(--brand);padding:6px 0;line-height:1.1}
+.datebox b{display:block;font-size:19px;font-weight:800}
+.datebox small{font-size:10.5px;text-transform:uppercase;font-weight:700;letter-spacing:.04em}
+.li .main{flex:1;min-width:0}
+.li .t{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li .m{color:var(--ink2);font-size:12.5px;margin-top:3px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.empty{color:var(--ink3);text-align:center;padding:26px 10px;font-weight:500}
+/* chips, pills, avatars */
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:7px;background:#eef1f7;color:#334155;white-space:nowrap}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:99px;white-space:nowrap}
+.pill:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.p-ok{background:var(--okSoft);color:#047857}.p-warn{background:var(--warnSoft);color:#b45309}.p-bad{background:var(--badSoft);color:#b91c1c}.p-info{background:var(--infoSoft);color:#0369a1}.p-vio{background:var(--vioSoft);color:#6d28d9}.p-mute{background:#f1f5f9;color:#64748b}
+.av{width:26px;height:26px;border-radius:50%;display:inline-grid;place-items:center;color:#fff;font-size:10.5px;font-weight:800;border:2px solid #fff;flex:none}
+.avs{display:inline-flex}.avs .av+.av{margin-left:-7px}
+.remote{display:inline-flex;align-items:center;gap:3px;font-size:11px;color:#0369a1;font-weight:600}
+.remote svg{width:13px;height:13px}
+/* table */
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.seg{display:inline-flex;background:#e9ebf3;border-radius:12px;padding:3px}
+.seg button{border:0;background:none;padding:7px 13px;border-radius:9px;font-weight:600;cursor:pointer;color:var(--ink2);font-size:13px}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(15,23,42,.1)}
+.sel{height:36px;border:1px solid var(--line);border-radius:10px;padding:0 10px;background:#fff;font-weight:500;cursor:pointer}
+.toolbar .count{margin-left:auto;color:var(--ink3);font-weight:600;font-size:13px}
+.tbl{width:100%;border-collapse:separate;border-spacing:0}
+.tbl th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);font-weight:700;padding:10px 12px;border-bottom:1px solid var(--line);background:#fff}
+.tbl td{padding:12px;border-bottom:1px solid var(--line2);vertical-align:middle}
+.tbl tr.r{cursor:pointer;transition:.1s}
+.tbl tr.r:hover td{background:#f8f9fd}
+.tbl tr.grp td{background:#f7f8fc;font-weight:800;font-size:12.5px;color:var(--brand);text-transform:capitalize;padding:9px 12px;letter-spacing:.01em}
+.tbl tr.grp td span{color:var(--ink3);font-weight:600;margin-left:8px;text-transform:none}
+.tbl .cl{font-weight:700}
+.tbl .muted{color:var(--ink2);font-size:12.5px}
+.tblwrap{padding:4px 8px 8px;overflow-x:auto}
+.strike{text-decoration:line-through;opacity:.6}
+/* calendar */
+.calhead{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.calhead h2{margin:0 6px;font-size:22px;letter-spacing:-.02em;text-transform:capitalize;min-width:210px}
+.ptfilter{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.pf{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:99px;padding:4px 11px 4px 5px;font-weight:600;font-size:12.5px;cursor:pointer;transition:.12s}
+.pf.off{opacity:.4;filter:grayscale(1)}
+.pf .av{width:22px;height:22px;border:0;font-size:9.5px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);background:#fff;border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);border:1px solid var(--line2)}
+.cal .dh{padding:10px;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);border-bottom:1px solid var(--line)}
+.cell{min-height:118px;border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);padding:6px;display:flex;flex-direction:column;gap:3px;cursor:pointer;transition:.1s;min-width:0}
+.cell:nth-child(7n){border-right:0}
+.cell:hover{background:#fafbff}
+.cell.out{background:#fafbfd}.cell.out .dn{color:#cbd5e1}
+.cell.we{background:#fbfbfe}
+.cell.hol .dn{color:var(--bad)}
+.dn{font-weight:700;font-size:12.5px;color:var(--ink2);display:flex;align-items:center;gap:6px;padding:2px 4px}
+.dn small{font-weight:600;font-size:10px;color:var(--bad);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cell.today .dn b{background:var(--brand);color:#fff;border-radius:8px;padding:1px 7px}
+.ev{font-size:11.5px;font-weight:600;padding:4px 7px;border-radius:7px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:4px;transition:.1s;border-left:3px solid rgba(0,0,0,.18)}
+.ev:hover{filter:brightness(1.08);transform:translateX(1px)}
+.ev.tent{background:#fff!important;color:var(--ink);border:1.5px dashed var(--c);border-left-width:3px}
+.ev.done{opacity:.55}
+.ev svg{width:12px;height:12px;flex:none}
+.ev.exp{background:var(--badSoft)!important;color:#b91c1c;border-left-color:var(--bad)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;color:var(--ink2);font-size:12.5px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.lg{width:18px;height:10px;border-radius:3px;display:inline-block}
+/* bars */
+.bars{display:flex;align-items:flex-end;gap:10px;height:190px;padding-top:10px}
+.bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end;min-width:0}
+.bar .stk{width:100%;max-width:34px;display:flex;flex-direction:column-reverse;border-radius:8px;overflow:hidden;background:#f1f3f9;min-height:4px}
+.bar .stk div{width:100%}
+.bar small{font-size:11px;color:var(--ink3);font-weight:700;text-transform:capitalize}
+.bar b{font-size:11.5px;color:var(--ink2)}
+.wl{display:flex;align-items:center;gap:12px;padding:9px 0}
+.wl+.wl{border-top:1px solid var(--line2)}
+.wl .nm{width:92px;font-weight:700}
+.wl .track{flex:1;height:10px;background:#f1f3f9;border-radius:99px;overflow:hidden}
+.wl .track div{height:100%;border-radius:99px}
+.wl .v{width:104px;text-align:right;font-size:12.5px;color:var(--ink2)}
+.wl .v b{color:var(--ink);font-size:14px}
+/* clients */
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
+.cc{background:#fff;border-radius:var(--r);border:1px solid var(--line2);box-shadow:var(--sh);padding:16px 18px;cursor:pointer;transition:.18s;display:flex;flex-direction:column;gap:10px}
+.cc:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(15,23,42,.1);border-color:#dcdff0}
+.cc .hd{display:flex;align-items:center;gap:12px}
+.cc .ini{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-weight:800;color:#fff;flex:none}
+.cc .nm{font-weight:800;line-height:1.25}
+.cc .chips{display:flex;gap:5px;flex-wrap:wrap}
+.cc .ft{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--ink2);border-top:1px solid var(--line2);padding-top:10px}
+.cc .ft b{display:block;color:var(--ink);font-size:12.5px}
+/* modal */
+.ov{position:fixed;inset:0;background:rgba(15,23,42,.42);backdrop-filter:blur(3px);z-index:100;display:flex;justify-content:flex-end;animation:fade .15s}
+.ov.center{justify-content:center;align-items:center}
+@keyframes fade{from{opacity:0}}
+@keyframes slide{from{transform:translateX(40px);opacity:.4}}
+@keyframes pop{from{transform:scale(.96);opacity:0}}
+.md{background:#fff;width:min(720px,100vw);height:100vh;display:flex;flex-direction:column;box-shadow:var(--sh2);animation:slide .2s ease-out}
+.ov.center .md{height:auto;max-height:90vh;border-radius:20px;width:min(520px,94vw);animation:pop .18s}
+.mh{display:flex;align-items:center;gap:12px;padding:20px 24px;border-bottom:1px solid var(--line2)}
+.mh h3{margin:0;font-size:18px;letter-spacing:-.02em;flex:1}
+.mh .meta{font-size:12px;color:var(--ink3)}
+.mb{flex:1;overflow:auto;padding:20px 24px}
+.mf{display:flex;align-items:center;gap:10px;padding:14px 24px;border-top:1px solid var(--line2);background:#fafbfd}
+.mf .sp{flex:1}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.f{display:flex;flex-direction:column;gap:6px;min-width:0}
+.f.full{grid-column:1/-1}
+.f>span{font-size:12px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.04em}
+.inp,.f input:not([type=checkbox]):not([type=color]),.f select,.f textarea{height:40px;border:1px solid var(--line);border-radius:10px;padding:0 12px;background:#fff;outline:0;transition:.15s;width:100%}
+.f textarea{height:84px;padding:10px 12px;resize:vertical}
+.inp:focus,.f input:focus,.f select:focus,.f textarea:focus{border-color:var(--brand2);box-shadow:0 0 0 4px var(--brandSoft)}
+.chipsedit{display:flex;flex-wrap:wrap;gap:6px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:6px;min-height:40px}
+.chipsedit input{border:0!important;box-shadow:none!important;height:28px!important;flex:1;min-width:140px;padding:0 6px!important}
+.tag{display:inline-flex;align-items:center;gap:4px;background:var(--brandSoft);color:#3730a3;font-weight:700;font-size:12.5px;padding:4px 6px 4px 10px;border-radius:8px}
+.tag button{border:0;background:none;cursor:pointer;color:#6366f1;padding:0;display:grid;place-items:center}
+.tag button svg{width:14px;height:14px}
+.quick{display:flex;gap:6px;flex-wrap:wrap}
+.quick button{border:1px dashed #c7cbe0;background:#fff;border-radius:8px;padding:3px 9px;font-size:12px;font-weight:600;cursor:pointer;color:var(--ink2)}
+.quick button:hover{border-color:var(--brand2);color:var(--brand)}
+.ptogs{display:flex;gap:6px;flex-wrap:wrap}
+.pt{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:#fff;border-radius:99px;padding:3px 11px 3px 4px;font-weight:600;font-size:12.5px;cursor:pointer;transition:.12s;color:var(--ink2)}
+.pt .av{width:22px;height:22px;border:0;font-size:9.5px;opacity:.45}
+.pt.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 10%,#fff);color:var(--ink)}
+.pt.on .av{opacity:1}
+.pt.mini{padding:2px;border-radius:50%}
+.pt.mini .av{width:24px;height:24px}
+.days{display:flex;flex-direction:column;gap:8px}
+.day{display:grid;grid-template-columns:150px 130px 140px 1fr 34px;gap:8px;align-items:center;background:#f8f9fc;border:1px solid var(--line2);border-radius:12px;padding:8px}
+.day input,.day select{height:36px!important}
+.day .cf{grid-column:1/-1;font-size:12px;color:#b45309;background:var(--warnSoft);border-radius:8px;padding:6px 10px;display:flex;gap:6px;align-items:center}
+.day .cf svg{width:14px;height:14px}
+.rel{margin-top:20px;background:#f8f9fc;border-radius:14px;padding:14px 16px}
+.rel h4{margin:0 0 10px;font-size:13px;color:var(--ink2)}
+.rel .rr{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13px}
+.rel .rr+.rr{border-top:1px solid var(--line)}
+.rel .rr .grow{flex:1}
+.check{display:flex;align-items:center;gap:10px;font-weight:600;cursor:pointer}
+.check input{width:18px;height:18px;accent-color:var(--brand)}
+.hint{font-size:12.5px;color:var(--ink3);line-height:1.5}
+/* settings */
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.prow{display:flex;align-items:center;gap:10px;padding:8px 0}
+.prow+.prow{border-top:1px solid var(--line2)}
+.prow input[type=color]{width:34px;height:34px;border:0;padding:0;background:none;cursor:pointer;border-radius:8px}
+.prow input[type=text]{flex:1}
+.taglist{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.kv{display:grid;grid-template-columns:140px 1fr;gap:8px 12px;font-size:13px;margin-bottom:14px}
+.kv dt{color:var(--ink3);font-weight:600}.kv dd{margin:0;font-weight:600;word-break:break-all}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+.pill svg{width:13px;height:13px;stroke-width:2.2}
+.pill.ic:before{display:none}
+.cell.drop{background:var(--brandSoft);box-shadow:inset 0 0 0 2px var(--brand2)}
+.ev[draggable=true]{cursor:grab}
+.confbox{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;margin-bottom:18px;font-size:13px;line-height:1.45}
+.confbox.tent{background:var(--vioSoft);color:#5b21b6}
+.confbox.ok{background:var(--okSoft);color:#065f46}
+.confbox p{margin:0;flex:1}
+.nlist{display:flex;flex-direction:column;gap:8px;margin:14px 0}
+.nrow{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+.nrow input[type=checkbox]{width:18px;height:18px;accent-color:var(--brand)}
+.nrow .nm{font-weight:700;width:90px}
+.nrow input[type=email]{flex:1;height:34px;border:1px solid var(--line);border-radius:8px;padding:0 10px}
+.nrow .em{flex:1;color:var(--ink2);font-size:13px}
+.pdot{width:10px;height:10px;border-radius:50%;background:var(--c);flex:none;opacity:.35;margin-left:6px}
+.pt.on .pdot,.pf .pdot{opacity:1}
+.pf .pdot{margin-left:4px}
+.cfw{display:contents}
+.av{text-transform:uppercase}
+.av.big{width:56px;height:56px;font-size:19px;border:0;box-shadow:0 6px 16px rgba(15,23,42,.15)}
+.profhead{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.profhead b{font-size:17px}
+.swatches{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sw{width:30px;height:30px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px var(--line);cursor:pointer}
+.sw.on{box-shadow:0 0 0 2px var(--ink)}
+.swatches input[type=color]{width:38px!important;height:32px!important;padding:2px!important}
+.sbuser{display:flex;align-items:center;gap:10px}
+.sbuser .av{width:34px;height:34px;font-size:12px;border:0}
+.sbuser b{color:#fff;display:block;font-size:13.5px}
+.team{display:flex;align-items:center;gap:12px;padding:10px 0}
+.team+.team{border-top:1px solid var(--line2)}
+.team .av{width:38px;height:38px;font-size:13px;border:0}
+.team .who2{flex:1;min-width:0}
+.team .who2 b{display:block}
+.team .who2 span{color:var(--ink3);font-size:12.5px}
+/* toasts */
+#toasts{position:fixed;top:18px;left:50%;transform:translateX(-50%);align-items:center;display:flex;flex-direction:column;gap:10px;z-index:200}
+.toast{background:#0f172a;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:var(--sh2);font-weight:600;font-size:13px;display:flex;align-items:center;gap:10px;animation:pop .2s;max-width:380px}
+.toast.err{background:#b91c1c}
+/* welcome */
+.who{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:14px}
+.who button{border:1.5px solid var(--line);background:#fff;border-radius:14px;padding:14px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;font-weight:700;transition:.15s}
+.who button:hover{border-color:var(--brand2);transform:translateY(-2px)}
+.who .av{width:42px;height:42px;font-size:14px}
+@media (max-width:1100px){.kpis{grid-template-columns:1fr 1fr}.grid2,.grid3,.sgrid{grid-template-columns:1fr}.search{width:200px}}
+@media (max-width:820px){#app{grid-template-columns:1fr}.sb{position:static;height:auto;flex-direction:row;flex-wrap:wrap;padding:10px}.brand{padding:4px}.sb .grow,.sbbox{display:none}.nav{width:auto;padding:8px 10px}.nav span.lbl{display:none}.top{flex-wrap:wrap;padding:14px}#view{padding:6px 14px 30px}.day{grid-template-columns:1fr 1fr}.fg{grid-template-columns:1fr}}
+@media print{.sb,.top .search,.top .btn,.banner,.toolbar,.ptfilter,.calhead .btn{display:none!important}#app{display:block}.card,.cal{box-shadow:none}.tbl th{position:static}body{background:#fff}.cell{min-height:90px}}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside class="sb">
+    <div class="brand">
+      <div class="logo"><svg class="i" viewBox="0 0 24 24"><path d="M12 2.8 4.5 6v5.6c0 4.6 3.2 8.5 7.5 9.6 4.3-1.1 7.5-5 7.5-9.6V6Z"/><path d="m8.8 12 2.2 2.2 4.4-4.4"/></svg></div>
+      <div><b>Scadenzario Audit</b><small id="studioName"></small></div>
+    </div>
+    <div id="navs"></div>
+    <div class="grow"></div>
+    <div class="sbbox">
+      <div class="row" style="color:#fff;font-weight:600"><span class="dot" id="syncDot"></span><span id="syncTxt">—</span></div>
+      <div id="syncSub" style="color:#a5b4fc"></div>
+      <button class="sblink" data-action="goto" data-view="settings">Gestisci archivio</button>
+    </div>
+    <div class="sbbox">
+      <div id="sbUser"></div>
+      <div style="color:#a5b4fc">Stai lavorando come</div>
+      <select id="userSel"></select>
+    </div>
+  </aside>
+  <main>
+    <div class="top">
+      <div><h1 id="vTitle">Dashboard</h1><div class="sub" id="vSub"></div></div>
+      <label class="search"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" placeholder="Cerca cliente, norma, ente…  (Ctrl+K)" autocomplete="off"></label>
+      <button class="btn" data-action="new-cert"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Certificato</button>
+      <button class="btn pri" data-action="new-audit"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuovo audit</button>
+    </div>
+    <div id="banner"></div>
+    <section id="view"></section>
+  </main>
+</div>
+<div id="modal"></div>
+<div id="toasts"></div>
+<datalist id="dl-clients"></datalist><datalist id="dl-norme"></datalist><datalist id="dl-enti"></datalist>
+<input type="file" id="importFile" accept=".json,application/json" hidden>
+
+<script id="seed" type="application/json">null</script>
+<script>
+'use strict';
+/* ================== costanti e utilità ================== */
+const FILE_NAME = 'Scadenzario audit.json';
+const BACKUP_DIR = 'backup';
+const CONFLICT_DIR = 'conflitti';
+const POLL_MS = 15000;
+const MESI = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+const MESI3 = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+const GG = ['dom','lun','mar','mer','gio','ven','sab'];
+const STATI = {
+  da_fissare:{l:'Da fissare',c:'p-warn',i:'clock'}, da_confermare:{l:'Da confermare',c:'p-vio',i:'q'},
+  confermato:{l:'Confermato',c:'p-info',i:'ok'}, svolto:{l:'Svolto',c:'p-ok',i:'check'}, annullato:{l:'Annullato',c:'p-mute',i:'ban'}
+};
+const stPill = st => `<span class="pill ic ${STATI[st].c}">${ic(STATI[st].i)}${STATI[st].l}</span>`;
+const ICON = {
+  dash:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
+  cal:'<rect x="3" y="4.5" width="18" height="16.5" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/>',
+  list:'<path d="M10 6h10M10 12h10M10 18h10"/><path d="m4 6 1.2 1.2L7.5 5M4 12l1.2 1.2L7.5 11M4 18l1.2 1.2 2.3-2.2"/>',
+  cert:'<circle cx="12" cy="9" r="6"/><path d="M8.5 13.8 7 22l5-3 5 3-1.5-8.2"/>',
+  users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 14.8c1.6.8 2.7 2.5 3 5.2"/>',
+  set:'<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>', x:'<path d="M18 6 6 18M6 6l12 12"/>',
+  l:'<path d="m15 18-6-6 6-6"/>', r:'<path d="m9 18 6-6-6-6"/>',
+  mon:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+  trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+  copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>',
+  alert:'<path d="M12 3 2 20h20Z"/><path d="M12 10v4M12 17h0"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  folder:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/>',
+  dl:'<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>', ul:'<path d="M12 16V5M7 10l5-5 5 5M5 20h14"/>',
+  print:'<path d="M7 9V3h10v6M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><rect x="7" y="14" width="10" height="7"/>',
+  refresh:'<path d="M20 11a8 8 0 0 0-14.3-4.9L4 8M4 4v4h4M4 13a8 8 0 0 0 14.3 4.9L20 16M20 20v-4h-4"/>',
+  renew:'<path d="M3 12a9 9 0 0 1 15.5-6.3L21 8M21 3v5h-5M21 12a9 9 0 0 1-15.5 6.3L3 16M3 21v-5h5"/>',
+  edit:'<path d="M4 20h4L19 9l-4-4L4 16Z"/>',
+  mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+  q:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14M12 17h0"/>',
+  ban:'<circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/>',
+  ok:'<path d="m5 12 4.5 4.5L19 7"/>',
+  move:'<path d="M5 9 2 12l3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/>',
+  check:'<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>'
+};
+const ic = (n, cls='') => `<svg class="i ${cls}" viewBox="0 0 24 24">${ICON[n]}</svg>`;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2, '0');
+const toISO = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const toD = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+const today = () => toISO(new Date());
+const addDays = (s, n) => { const d = toD(s); d.setDate(d.getDate()+n); return toISO(d); };
+const addYears = (s, n) => { const d = toD(s); d.setFullYear(d.getFullYear()+n); return toISO(d); };
+const diff = (a, b) => Math.round((toD(a) - toD(b)) / 864e5);
+const uid = () => (crypto.randomUUID ? crypto.randomUUID().replace(/-/g,'').slice(0,12) : Math.random().toString(36).slice(2,14));
+const nowISO = () => new Date().toISOString();
+const clone = o => JSON.parse(JSON.stringify(o));
+const norm = s => String(s ?? '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+const fmtD = (s, wd=false) => { if (!s) return '—'; const d = toD(s); return `${wd ? GG[d.getDay()]+' ' : ''}${d.getDate()} ${MESI3[d.getMonth()]} ${d.getFullYear()}`; };
+const fmtNum = n => String(Math.round(n*10)/10).replace('.', ',');
+function fmtDays(days) {
+  const ds = days.map(d => d.date).filter(Boolean).sort();
+  if (!ds.length) return '—';
+  if (ds.length === 1) return fmtD(ds[0], true);
+  const a = toD(ds[0]), b = toD(ds[ds.length-1]);
+  const consecutive = ds.every((d, i) => i === 0 || diff(d, ds[i-1]) === 1);
+  if (a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear()) {
+    return (consecutive ? `${a.getDate()}–${b.getDate()}` : ds.map(d => toD(d).getDate()).join(', ')) + ` ${MESI3[a.getMonth()]} ${a.getFullYear()}`;
+  }
+  const first = `${a.getDate()} ${MESI3[a.getMonth()]}${a.getFullYear() !== b.getFullYear() ? ' '+a.getFullYear() : ''}`;
+  return `${first} ${consecutive ? '–' : '…'} ${b.getDate()} ${MESI3[b.getMonth()]} ${b.getFullYear()}`;
+}
+function relDays(n) {
+  if (n === 0) return 'oggi'; if (n === 1) return 'domani'; if (n === -1) return 'ieri';
+  if (n > 0) return n < 60 ? `tra ${n} giorni` : `tra ${Math.round(n/30)} mesi`;
+  return -n < 60 ? `${-n} giorni fa` : `${Math.round(-n/30)} mesi fa`;
+}
+// festività italiane
+const holCache = {};
+function holidays(y) {
+  if (holCache[y]) return holCache[y];
+  const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1;
+  const easter = toISO(new Date(y, mo-1, da));
+  const H = {[`${y}-01-01`]:'Capodanno',[`${y}-01-06`]:'Epifania',[easter]:'Pasqua',[addDays(easter,1)]:'Pasquetta',[`${y}-04-25`]:'Liberazione',[`${y}-05-01`]:'Festa del lavoro',[`${y}-06-02`]:'Festa della Repubblica',[`${y}-08-15`]:'Ferragosto',[`${y}-11-01`]:'Ognissanti',[`${y}-12-08`]:'Immacolata',[`${y}-12-25`]:'Natale',[`${y}-12-26`]:'S. Stefano'};
+  return holCache[y] = H;
+}
+
+/* ================== stato ================== */
+const S = {
+  db: null, mode: 'local', dir: null, needsReconnect: null, lastMod: 0, saving: false, pending: false,
+  syncState: 'local', syncMsg: '', lastSave: null, backupDay: null,
+  user: localStorage.getItem('scad-user') || '',
+  view: localStorage.getItem('scad-view') || 'dashboard',
+  q: '', cal: (() => { const d = new Date(); return { y: d.getFullYear(), m: d.getMonth(), off: [] }; })(),
+  fa: { seg: 'prossimi', year: '', person: '', norma: '', tipo: '' },
+  fc: { seg: 'tutti', norma: '', person: '' },
+  draft: null, draftType: null, mine: {}, recovering: false
+};
+const fsSupported = 'showDirectoryPicker' in window;
+
+/* ================== dati: accesso e calcoli ================== */
+const audits = () => S.db.audits.filter(a => !a.deleted);
+const certs = () => S.db.certs.filter(c => !c.deleted);
+const people = () => S.db.settings.people;
+const person = id => people().find(p => p.id === id) || { id, name: id ? id[0] + id.slice(1).toLowerCase() : '?', color: '#94a3b8' };
+const initials = n => n.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+const sigla = p => (p.sigla || initials(p.name || '?')).slice(0, 3);
+const av = id => { const p = person(id); return `<span class="av" style="background:${p.color}" title="${esc(p.name)}">${esc(sigla(p))}</span>`; };
+const avs = ids => ids && ids.length ? `<span class="avs">${ids.map(av).join('')}</span>` : '<span class="muted">—</span>';
+const names = ids => (ids || []).map(id => person(id).name).join(', ');
+const chips = arr => (arr || []).map(n => `<span class="chip">${esc(n)}</span>`).join(' ');
+const shortNorma = n => n.replace(/^ISO\/IEC |^ISO |^UNI\//, '').replace('IATF 16949', 'IATF');
+
+function auditStatus(a) {
+  if (a.stato === 'annullato') return 'annullato';
+  const ds = (a.days || []).map(d => d.date).filter(Boolean).sort();
+  if (!ds.length || a.stato === 'da_fissare') return 'da_fissare';
+  if (ds[ds.length-1] < today() && a.stato !== 'da_confermare') return 'svolto';
+  return a.stato;
+}
+const firstDay = a => (a.days || []).map(d => d.date).filter(Boolean).sort()[0] || '';
+const lastDay = a => (a.days || []).map(d => d.date).filter(Boolean).sort().pop() || '';
+const dayLoad = d => d.half ? 0.5 : 1;
+function certStatus(c) {
+  if (c.verificare) return 'verificare';
+  const n = diff(c.scadenza, today());
+  if (n < 0) return 'scaduto'; if (n <= 90) return 'urgente'; if (n <= 180) return 'presto'; return 'ok';
+}
+const CST = { verificare:{l:'Da verificare',c:'p-vio'}, scaduto:{l:'Scaduto',c:'p-bad'}, urgente:{l:'Entro 90 gg',c:'p-warn'}, presto:{l:'Entro 6 mesi',c:'p-info'}, ok:{l:'Valido',c:'p-ok'} };
+function nextAuditFor(client, norma) {
+  return audits().filter(a => a.client === client && (!norma || (a.norme || []).includes(norma)) && ['confermato','da_confermare','da_fissare'].includes(auditStatus(a)))
+    .sort((x, y) => (firstDay(x) || '9999').localeCompare(firstDay(y) || '9999'))[0];
+}
+const auditHay = a => norm([a.client, (a.norme||[]).join(' '), a.tipo, a.ente, a.auditor, a.note, names(a.incarico), names(a.days.flatMap(d => d.people||[]))].join(' '));
+const certHay = c => norm([c.client, c.norma, c.ente, c.numero, c.note, names(c.referente)].join(' '));
+const matchQ = hay => !S.q || norm(S.q).split(/\s+/).every(t => hay.includes(t));
+const clientList = () => [...new Set([...audits().map(a => a.client), ...certs().map(c => c.client)])].filter(Boolean).sort((a, b) => a.localeCompare(b, 'it'));
+const clientColor = n => { let h = 0; for (const ch of n) h = (h * 31 + ch.charCodeAt(0)) % 360; return `hsl(${h} 62% 52%)`; };
+
+/* ================== archivio: IndexedDB per l'handle della cartella ================== */
+function idb() { return new Promise((res, rej) => { const r = indexedDB.open('scadenzario-audit', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
+async function idbGet(k) { try { const db = await idb(); return await new Promise(res => { const r = db.transaction('kv').objectStore('kv').get(k); r.onsuccess = () => res(r.result); r.onerror = () => res(null); }); } catch { return null; } }
+async function idbSet(k, v) { try { const db = await idb(); await new Promise(res => { const t = db.transaction('kv', 'readwrite'); t.objectStore('kv').put(v, k); t.oncomplete = res; t.onerror = res; }); } catch {} }
+
+function mergeDB(a, b) {
+  if (!a) return b; if (!b) return a;
+  const out = { app: 'scadenzario-audit', version: 1 };
+  out.migrations = [...new Set([...(a.migrations || []), ...(b.migrations || [])])];
+  out.settings = (b.settings?.updatedAt || '') > (a.settings?.updatedAt || '') ? b.settings : a.settings;
+  for (const coll of ['audits', 'certs']) {
+    const m = new Map();
+    for (const r of [...(a[coll] || []), ...(b[coll] || [])]) {
+      const ex = m.get(r.id);
+      if (!ex || (r.updatedAt || '') > (ex.updatedAt || '')) m.set(r.id, r);
+    }
+    const limit = new Date(Date.now() - 90 * 864e5).toISOString();
+    out[coll] = [...m.values()].filter(r => !(r.deleted && r.updatedAt < limit && !String(r.id).startsWith('ip')));
+  }
+  return out;
+}
+const sameDB = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
+function setSync(state, msg='') { S.syncState = state; S.syncMsg = msg; paintSync(); }
+function paintSync() {
+  const dot = $('#syncDot'), t = $('#syncTxt'), sub = $('#syncSub');
+  const map = { ok: ['sync-ok', 'Sincronizzato'], saving: ['sync-saving', 'Salvataggio…'], error: ['sync-err', 'Errore di salvataggio'], local: ['sync-local', 'Solo su questo browser'] };
+  const [cls, txt] = map[S.syncState] || map.local;
+  dot.className = 'dot ' + cls; t.textContent = txt;
+  sub.textContent = S.syncState === 'error' ? S.syncMsg : (S.mode === 'folder' ? `Cartella: ${S.dir.name}` : (S.needsReconnect ? 'Cartella da riattivare' : 'Nessuna cartella collegata'));
+}
+
+async function readFolderFile() {
+  const fh = await S.dir.getFileHandle(FILE_NAME);
+  const f = await fh.getFile();
+  return { data: f.size ? JSON.parse(await f.text()) : null, mod: f.lastModified };
+}
+async function openFolder(dir, isNewPick) {
+  S.dir = dir; S.mode = 'folder'; S.needsReconnect = null;
+  let remote = null;
+  try { const r = await readFolderFile(); remote = r.data; S.lastMod = r.mod; }
+  catch (e) {
+    if (e.name !== 'NotFoundError') { toast('Impossibile leggere l\'archivio: ' + e.message, true); }
+  }
+  const hadLocal = !!localStorage.getItem('scad-db');
+  if (remote && remote.app === 'scadenzario-audit') {
+    S.db = (hadLocal && confirm('Su questo browser ci sono modifiche fatte prima di collegare la cartella. Vuoi unirle all\'archivio condiviso?')) ? mergeDB(remote, S.db) : remote;
+    const mig = migrate(S.db);
+    if (hadLocal) localStorage.removeItem('scad-db');
+    if (mig || !sameDB(S.db, remote)) writeFolder();
+    if (mig) toast(`Piano aggiornato: ${mig} audit «da confermare»`);
+    if (isNewPick) toast(`Archivio caricato dalla cartella «${dir.name}»`);
+  } else {
+    // archivio nuovo: si parte dai dati presenti (import dall'Excel o dati locali)
+    await writeFolder(true); localStorage.removeItem('scad-db');
+    toast(`Creato «${FILE_NAME}» nella cartella «${dir.name}»`);
+  }
+  if (S.draftType === 'welcome') closeModal();
+  setSync('ok'); render(); renderBanner();
+  if (!S.draft && (!S.user || !people().some(p => p.id === S.user)) && people().length) { S.draft = {}; S.draftType = 'who'; renderModal(true); }
+  recoverConflicts();
+}
+async function connectFolder() {
+  if (!fsSupported) { toast('Questo browser non supporta l\'accesso alle cartelle: usa Chrome o Edge.', true); return; }
+  try {
+    const dir = await window.showDirectoryPicker({ id: 'scadenzario-audit', mode: 'readwrite' });
+    await idbSet('dir', dir);
+    await openFolder(dir, true);
+  } catch (e) { if (e.name !== 'AbortError') toast('Cartella non collegata: ' + e.message, true); }
+}
+async function reconnect() {
+  const h = S.needsReconnect; if (!h) return connectFolder();
+  if (S.reconnecting) return; S.reconnecting = true;
+  try {
+    const p = await h.requestPermission({ mode: 'readwrite' });
+    if (p === 'granted') { disarmAutoReconnect(); await openFolder(h); }
+    else if (p === 'denied') { disarmAutoReconnect(); toast('Accesso alla cartella non concesso: usa «Riattiva accesso» quando vuoi.', true); }
+  } catch (e) { toast('Permesso negato: ' + e.message, true); }
+  finally { S.reconnecting = false; }
+}
+// Il browser richiede un clic dell'utente per ridare il permesso: lo si aggancia al primo clic/tasto nella pagina.
+function autoReconnect(e) { if (!S.needsReconnect) return disarmAutoReconnect(); if (e.target.closest?.('[data-action="reconnect"]')) return; reconnect(); }
+function armAutoReconnect() { document.addEventListener('pointerdown', autoReconnect, true); document.addEventListener('keydown', autoReconnect, true); }
+function disarmAutoReconnect() { document.removeEventListener('pointerdown', autoReconnect, true); document.removeEventListener('keydown', autoReconnect, true); }
+function persist() {
+  if (S.mode === 'folder') { writeFolder(); }
+  else { try { localStorage.setItem('scad-db', JSON.stringify(S.db)); } catch (e) { toast('Spazio del browser esaurito: esporta un backup.', true); } }
+}
+async function writeFolder(force) {
+  if (S.saving) { S.pending = true; return; }
+  S.saving = true; setSync('saving');
+  try {
+    const fh = await S.dir.getFileHandle(FILE_NAME, { create: true });
+    let remote = null;
+    if (!force) { try { const f = await fh.getFile(); if (f.size) remote = JSON.parse(await f.text()); } catch {} }
+    const merged = remote ? mergeDB(remote, S.db) : S.db;
+    if (remote) await backupIfNeeded(remote);
+    const w = await fh.createWritable(); await w.write(JSON.stringify(merged)); await w.close();
+    const changedByOthers = remote && !sameDB(merged, S.db);
+    S.db = merged; S.lastMod = (await fh.getFile()).lastModified; S.lastSave = new Date();
+    setSync('ok');
+    for (const [id, m] of Object.entries(S.mine)) { const cur = merged[m.coll].find(x => x.id === id); if (cur && sameDB(cur, m.rec)) delete S.mine[id]; }
+    await checkLostEdits();
+    if (changedByOthers) render();
+  } catch (e) { setSync('error', e.message); toast('Salvataggio non riuscito: ' + e.message, true); }
+  S.saving = false;
+  if (S.pending) { S.pending = false; writeFolder(); }
+}
+async function conflictDir() {
+  const b = await S.dir.getDirectoryHandle(BACKUP_DIR, { create: true });
+  return b.getDirectoryHandle(CONFLICT_DIR, { create: true });
+}
+async function saveConflictFile(name, text) {
+  const d = await conflictDir(); const fh = await d.getFileHandle(name, { create: true });
+  const w = await fh.createWritable(); await w.write(text); await w.close();
+  const f = await fh.getFile(); return f.size === new Blob([text]).size;
+}
+const stamp = () => { const d = new Date(); return `${toISO(d)} ${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`; };
+const recLabel = (coll, r) => coll === 'audits' ? `l'audit ${r.client} (${(r.norme || []).join(', ')}, ${fmtDays(r.days || [])})` : `il certificato ${r.norma} di ${r.client}`;
+// Le mie modifiche di questa sessione: se nel frattempo un collega ha salvato una versione più recente dello stesso record,
+// la mia non viene buttata ma archiviata in backup/conflitti e segnalata.
+async function checkLostEdits() {
+  if (S.mode !== 'folder') return;
+  for (const [id, m] of Object.entries(S.mine)) {
+    const cur = S.db[m.coll].find(x => x.id === id);
+    if (cur && sameDB(cur, m.rec)) continue;
+    if (cur && (cur.updatedAt || '') < (m.rec.updatedAt || '')) continue; // la mia non è ancora stata unita: ci pensa il prossimo salvataggio
+    try {
+      const ok = await saveConflictFile(`Modifica non applicata ${stamp()} ${String(m.rec.client || '').replace(/[\\/:*?"<>|]/g, '')}.json`,
+        JSON.stringify({ app: 'scadenzario-audit', version: 1, nota: 'Versione sovrascritta da una modifica contemporanea più recente', settings: S.db.settings, audits: m.coll === 'audits' ? [m.rec] : [], certs: m.coll === 'certs' ? [m.rec] : [], vincente: cur || null }, null, 1));
+      if (ok) {
+        delete S.mine[id];
+        toast(`${cur?.updatedBy || 'Un collega'} ha modificato contemporaneamente ${recLabel(m.coll, m.rec)}: è rimasta la sua versione. La tua è salvata in ${BACKUP_DIR}/${CONFLICT_DIR}: controlla e reinserisci le modifiche se servono.`, true, 15000);
+      }
+    } catch (e) { console.warn('conflitto', e); }
+  }
+}
+const isConflictCopy = n => n !== FILE_NAME && /^Scadenzario audit\s*\(.+\)\s*\.json$/i.test(n);
+// Copie in conflitto create da Dropbox: le unisce all'archivio, verifica che tutto sia nel file principale
+// e solo dopo le sposta in backup/conflitti (non vengono mai cancellate senza una copia).
+async function recoverConflicts() {
+  if (S.mode !== 'folder' || S.recovering || S.saving) return;
+  S.recovering = true;
+  try {
+    const found = [];
+    for await (const [n, h] of S.dir.entries()) if (h.kind === 'file' && isConflictCopy(n)) found.push([n, h]);
+    for (const [n, h] of found) {
+      let text, data, fmod;
+      try { const f = await h.getFile(); fmod = f.lastModified; text = await f.text(); data = JSON.parse(text); } catch { continue; } // ancora in sincronizzazione
+      if (!data || data.app !== 'scadenzario-audit') continue;
+      // modifiche "fresche" nella copia (fatte poco prima che Dropbox la creasse) che perdono contro una versione più recente
+      const clashes = [];
+      for (const coll of ['audits', 'certs']) for (const r of data[coll] || []) {
+        const cur = S.db[coll].find(x => x.id === r.id);
+        if (cur && !sameDB(cur, r) && (cur.updatedAt || '') > (r.updatedAt || '') && (fmod - new Date(r.updatedAt).getTime()) < 30 * 60e3) clashes.push(recLabel(coll, r));
+      }
+      S.db = mergeDB(S.db, data);
+      await writeFolder();
+      if (S.syncState !== 'ok') break;
+      // verifica: ogni record della copia deve essere nel file principale, uguale o in versione più recente
+      let main; try { main = (await readFolderFile()).data; } catch { break; }
+      const ok = ['audits', 'certs'].every(c => (data[c] || []).every(x => { const m = main[c].find(y => y.id === x.id); return m ? (m.updatedAt || '') >= (x.updatedAt || '') : !!x.deleted; }));
+      if (!ok) { toast(`Copia in conflitto «${n}» non ancora unita: riprovo tra poco.`, true); continue; }
+      if (!(await saveConflictFile(`${stamp()} ${n}`, text))) continue;
+      await S.dir.removeEntry(n);
+      render();
+      toast(`Recuperate le modifiche dalla copia in conflitto «${n}» (archiviata in ${BACKUP_DIR}/${CONFLICT_DIR})`);
+      if (clashes.length) toast(`Stessi record modificati da due persone, tenuta la versione più recente: ${clashes.slice(0, 3).join('; ')}${clashes.length > 3 ? '…' : ''}. L'altra versione è nella copia archiviata.`, true, 15000);
+    }
+  } catch (e) { console.warn('recupero conflitti', e); }
+  finally { S.recovering = false; }
+}
+async function backupIfNeeded(remote) {
+  const d = today(); if (S.backupDay === d) return;
+  try {
+    const bdir = await S.dir.getDirectoryHandle(BACKUP_DIR, { create: true });
+    const name = `Scadenzario audit ${d}.json`;
+    let exists = true; try { await bdir.getFileHandle(name); } catch { exists = false; }
+    if (!exists) {
+      const fh = await bdir.getFileHandle(name, { create: true }); const w = await fh.createWritable(); await w.write(JSON.stringify(remote)); await w.close();
+      const files = []; for await (const [n, h] of bdir.entries()) if (h.kind === 'file' && n.startsWith('Scadenzario audit ')) files.push(n);
+      files.sort(); while (files.length > 60) await bdir.removeEntry(files.shift());
+    }
+    S.backupDay = d;
+  } catch (e) { console.warn('backup', e); }
+}
+async function poll() {
+  if (S.mode !== 'folder' || S.saving || document.hidden) return;
+  await recoverConflicts();
+  try {
+    const fh = await S.dir.getFileHandle(FILE_NAME); const f = await fh.getFile();
+    if (f.lastModified === S.lastMod) return;
+    const remote = JSON.parse(await f.text()); S.lastMod = f.lastModified;
+    const merged = mergeDB(S.db, remote);
+    if (!sameDB(merged, S.db)) {
+      const who = [...merged.audits, ...merged.certs].sort((x, y) => (y.updatedAt||'').localeCompare(x.updatedAt||''))[0]?.updatedBy;
+      S.db = merged; await checkLostEdits(); render(); toast(`Dati aggiornati${who ? ' (ultima modifica: ' + who + ')' : ''}`);
+    }
+    setSync('ok');
+  } catch (e) { /* file in scrittura da Dropbox: si riprova al prossimo giro */ }
+}
+
+/* ================== aggiornamenti dei dati ================== */
+// Regola: "confermato" solo con giornate e auditor stabiliti. Le date ipotetiche (12 mesi dopo l'audit precedente)
+// e gli audit futuri senza auditor importati dall'Excel diventano "da confermare".
+function migrate(db) {
+  db.migrations ||= []; let n = 0;
+  if (!db.migrations.includes('stati-v2')) {
+    const t = today();
+    for (const a of db.audits) {
+      if (a.deleted || a.updatedBy !== 'Import Excel' || a.stato !== 'confermato') continue;
+      const f = firstDay(a); if (!f || f <= t) continue;
+      if (f >= '2027-01-01' || !(a.auditor || '').trim()) { a.stato = 'da_confermare'; a.updatedAt = nowISO(); a.updatedBy = 'Aggiornamento programma'; n++; }
+    }
+    db.migrations.push('stati-v2');
+  }
+  if (!db.migrations.includes('piano-v1')) { n += applyPlan(db, addMonths(today(), PLAN_MONTHS)); db.migrations.push('piano-v1'); }
+  // il piano si allunga da solo: tiene sempre almeno 15 mesi di ipotesi
+  const mk = 'piano-' + today().slice(0, 7);
+  if (!db.migrations.includes(mk)) { n += applyPlan(db, addMonths(today(), PLAN_MONTHS)); db.migrations.push(mk); }
+  for (const p of db.settings.people || []) if (p.email === undefined) p.email = '';
+  return n;
+}
+
+/* ================== piano ipotetico (12-15 mesi) ================== */
+const PLAN_MONTHS = 15;
+const PLAN_SKIP = ['Follow-up', 'Verifica speciale', 'Stage 1'];
+const seriesKey = a => a.client + '|' + [...(a.norme || [])].sort().join('+');
+function hashId(str) { let h1 = 5381, h2 = 52711; for (const ch of str) { const k = ch.charCodeAt(0); h1 = Math.imul(h1, 33) ^ k; h2 = Math.imul(h2, 31) ^ k; } return 'ip' + (h1 >>> 0).toString(36) + (h2 >>> 0).toString(36); }
+const addMonths = (s, n) => { const d = toD(s); d.setMonth(d.getMonth() + n); return toISO(d); };
+const workdayOnOrAfter = s => { let d = s; while ([0, 6].includes(toD(d).getDay()) || holidays(toD(d).getFullYear())[d]) d = addDays(d, 1); return d; };
+// Per ogni cliente+norme prende l'ultimo audit e propone quelli successivi ogni 12 mesi (stesso giorno della settimana) fino a "until".
+function planProposals(db, until) {
+  const t = today(), oldest = addDays(t, -550);
+  const ids = new Set(db.audits.map(a => a.id));
+  const last = new Map();
+  for (const a of db.audits) {
+    if (a.deleted || a.stato === 'annullato' || !firstDay(a) || PLAN_SKIP.includes(a.tipo)) continue;
+    const k = seriesKey(a), cur = last.get(k);
+    if (!cur || firstDay(a) > firstDay(cur)) last.set(k, a);
+  }
+  const out = [];
+  for (const base of last.values()) {
+    if (firstDay(base) < oldest) continue;
+    let prev = base.days.map(d => d.date).filter(Boolean).sort();
+    for (let i = 0; i < 4; i++) {
+      const nd = prev.map(d => addDays(d, 364)); prev = nd;
+      if (nd[0] > until) break;
+      if (nd[0] <= t) continue;
+      const id = hashId(base.id + '|' + nd[0]);
+      if (ids.has(id)) continue;
+      const cert = db.certs.find(c => !c.deleted && !c.verificare && c.client === base.client && (base.norme || []).includes(c.norma) && Math.abs(diff(c.scadenza, nd[0])) <= 100);
+      const src = base.days.slice().sort((x, y) => x.date.localeCompare(y.date));
+      out.push({ id, client: base.client, norme: [...(base.norme || [])], tipo: cert ? 'Ricertificazione' : 'Sorveglianza', stato: 'da_confermare',
+        days: src.map((d, j) => ({ date: workdayOnOrAfter(nd[j]), remote: !!d.remote, half: !!d.half, people: [...(d.people || [])] })),
+        incarico: [...(base.incarico || [])], ente: base.ente || '', auditor: '', ipotesi: true,
+        note: `Ipotesi a 12 mesi dall'audit del ${fmtDays(base.days)}${cert ? ` · certificato ${cert.norma} in scadenza il ${fmtD(cert.scadenza)}` : ''}`,
+        updatedAt: nowISO(), updatedBy: 'Piano automatico' });
+    }
+  }
+  return out.sort((a, b) => firstDay(a).localeCompare(firstDay(b)));
+}
+function applyPlan(db, until) { const list = planProposals(db, until); db.audits.push(...list); return list.length; }
+
+/* ================== salvataggio record ================== */
+function upsert(coll, rec, silent) {
+  rec.updatedAt = nowISO(); rec.updatedBy = S.user ? person(S.user).name : 'Anonimo';
+  const arr = S.db[coll]; const i = arr.findIndex(x => x.id === rec.id);
+  if (i >= 0) arr[i] = rec; else arr.push(rec);
+  if (S.mode === 'folder') S.mine[rec.id] = { coll, rec: clone(rec) };
+  if (!silent) { persist(); render(); }
+}
+function remove(coll, id) {
+  const r = S.db[coll].find(x => x.id === id); if (!r) return;
+  r.deleted = true; upsert(coll, r);
+}
+function saveSettings() { S.db.settings.updatedAt = nowISO(); S.db.settings.updatedBy = S.user ? person(S.user).name : ''; persist(); render(); }
+
+/* ================== UI generale ================== */
+function toast(msg, err, ms) {
+  const t = document.createElement('div'); t.className = 'toast' + (err ? ' err' : ''); t.innerHTML = (err ? ic('alert') : ic('check')) + `<span>${esc(msg)}</span>`;
+  $('#toasts').appendChild(t); setTimeout(() => t.remove(), ms || (err ? 6000 : 3500)); t.onclick = () => t.remove(); t.style.cursor = 'pointer';
+}
+const VIEWS = {
+  dashboard: { t: 'Dashboard', i: 'dash' }, calendar: { t: 'Calendario', i: 'cal' }, audits: { t: 'Audit', i: 'list' },
+  certs: { t: 'Certificati', i: 'cert' }, clients: { t: 'Clienti', i: 'users' }, settings: { t: 'Impostazioni', i: 'set' }
+};
+function renderNav() {
+  const alert = certs().filter(c => ['scaduto', 'verificare'].includes(certStatus(c))).length;
+  $('#navs').innerHTML = Object.entries(VIEWS).map(([k, v]) =>
+    `<button class="nav ${S.view === k ? 'on' : ''}" data-action="goto" data-view="${k}">${ic(v.i)}<span class="lbl">${v.t}</span>${k === 'certs' && alert ? `<span class="cnt">${alert}</span>` : ''}</button>`).join('');
+  $('#studioName').textContent = S.db.settings.studio || '';
+  const me = S.user && people().find(p => p.id === S.user);
+  $('#sbUser').innerHTML = me ? `<div class="sbuser">${av(me.id)}<div><b>${esc(me.name)}</b><button class="sblink" data-action="edit-profile" data-p="${esc(me.id)}">Modifica profilo</button></div></div>` : '';
+  const us = $('#userSel');
+  us.innerHTML = `<option value="">— seleziona —</option>` + people().map(p => `<option value="${esc(p.id)}" ${p.id === S.user ? 'selected' : ''}>${esc(p.name)}</option>`).join('');
+}
+function renderBanner() {
+  let h = '';
+  if (S.mode !== 'folder') {
+    if (S.needsReconnect) h = `<div class="banner">${ic('folder')}<p><b>Riattiva l'archivio condiviso.</b> Per sicurezza il browser chiede di confermare l'accesso alla cartella «${esc(S.needsReconnect.name)}»: clicca in un punto qualsiasi della pagina o sul pulsante.</p><button class="btn pri" data-action="reconnect">Riattiva accesso</button></div>`;
+    else if (fsSupported) h = `<div class="banner">${ic('folder')}<p><b>I dati sono salvati solo in questo browser.</b> Collega la cartella Dropbox condivisa per lavorare in team con dati sempre sincronizzati.</p><button class="btn pri" data-action="connect">Collega cartella</button></div>`;
+    else h = `<div class="banner warn">${ic('alert')}<p><b>Questo browser non può salvare nella cartella condivisa.</b> Apri il programma con Google Chrome o Microsoft Edge. Per ora i dati restano solo in questo browser.</p></div>`;
+  }
+  $('#banner').innerHTML = h;
+}
+function render() {
+  renderNav(); paintSync();
+  const v = VIEWS[S.view] ? S.view : 'dashboard';
+  $('#vTitle').textContent = VIEWS[v].t;
+  const d = new Date(); $('#vSub').textContent = `${GG[d.getDay()]} ${d.getDate()} ${MESI[d.getMonth()]} ${d.getFullYear()}`;
+  $('#view').innerHTML = ({ dashboard: vDash, calendar: vCal, audits: vAudits, certs: vCerts, clients: vClients, settings: vSettings })[v]();
+  $('#dl-clients').innerHTML = clientList().map(c => `<option value="${esc(c)}">`).join('');
+  $('#dl-norme').innerHTML = S.db.settings.norme.map(c => `<option value="${esc(c)}">`).join('');
+  $('#dl-enti').innerHTML = S.db.settings.enti.map(c => `<option value="${esc(c)}">`).join('');
+  if (S.draft) renderModal();
+}
+
+/* ================== DASHBOARD ================== */
+function vDash() {
+  const t = today(), t30 = addDays(t, 30);
+  const act = audits();
+  const next30 = act.filter(a => ['confermato', 'da_confermare'].includes(auditStatus(a)) && a.days.some(d => d.date >= t && d.date <= t30));
+  const gg30 = next30.reduce((s, a) => s + a.days.filter(d => d.date >= t && d.date <= t30).reduce((x, d) => x + dayLoad(d), 0), 0);
+  const t60k = addDays(t, 60);
+  const toFix = act.filter(a => auditStatus(a) === 'da_fissare' || (auditStatus(a) === 'da_confermare' && (firstDay(a) || '') <= t60k));
+  const planCount = act.filter(a => auditStatus(a) === 'da_confermare' && firstDay(a) > t60k).length;
+  const cs = certs();
+  const exp90 = cs.filter(c => certStatus(c) === 'urgente');
+  const bad = cs.filter(c => ['scaduto', 'verificare'].includes(certStatus(c)));
+  const noPlan = cs.filter(c => ['urgente', 'presto'].includes(certStatus(c)) && !nextAuditFor(c.client, c.norma));
+  const u = S.user ? person(S.user).name : '';
+  const h = new Date().getHours(); const saluto = h < 13 ? 'Buongiorno' : h < 18 ? 'Buon pomeriggio' : 'Buonasera';
+
+  const up = act.filter(a => ['confermato', 'da_confermare'].includes(auditStatus(a)) && lastDay(a) >= t)
+    .sort((a, b) => (a.days.find(d => d.date >= t)?.date || '').localeCompare(b.days.find(d => d.date >= t)?.date || '')).slice(0, 7);
+  const upHtml = up.map(a => {
+    const nd = a.days.filter(d => d.date >= t).map(d => d.date).sort()[0]; const D = toD(nd);
+    const pp = [...new Set(a.days.flatMap(d => d.people || []))];
+    const rem = a.days.some(d => d.remote);
+    return `<div class="li" data-action="open-audit" data-id="${a.id}">
+      <div class="datebox"><small>${GG[D.getDay()]}</small><b>${D.getDate()}</b><small>${MESI3[D.getMonth()]}</small></div>
+      <div class="main"><div class="t">${esc(a.client)}</div><div class="m">${chips((a.norme||[]).map(shortNorma))} <span>${esc(a.tipo)}</span> · <span>${fmtDays(a.days)}</span>${rem ? `<span class="remote">${ic('mon')}remoto</span>` : ''}</div></div>
+      ${auditStatus(a) === 'da_confermare' ? stPill('da_confermare') : ''}
+      ${avs(pp.length ? pp : a.incarico)}
+      <span class="muted" style="width:74px;text-align:right;font-size:12px;font-weight:600">${relDays(diff(nd, t))}</span></div>`;
+  }).join('') || `<div class="empty">Nessun audit in programma</div>`;
+
+  const ex = cs.filter(c => ['scaduto', 'urgente', 'presto'].includes(certStatus(c)) && !c.verificare)
+    .sort((a, b) => a.scadenza.localeCompare(b.scadenza)).slice(0, 7);
+  const exHtml = ex.map(c => {
+    const n = diff(c.scadenza, t), st = certStatus(c), na = nextAuditFor(c.client, c.norma);
+    return `<div class="li" data-action="open-cert" data-id="${c.id}">
+      <div class="datebox" style="background:${st === 'scaduto' ? 'var(--badSoft)' : st === 'urgente' ? 'var(--warnSoft)' : 'var(--infoSoft)'};color:${st === 'scaduto' ? '#b91c1c' : st === 'urgente' ? '#b45309' : '#0369a1'}"><b>${Math.abs(n) > 99 ? Math.round(Math.abs(n)/30) : Math.abs(n)}</b><small>${Math.abs(n) > 99 ? 'mesi' : 'giorni'}</small></div>
+      <div class="main"><div class="t">${esc(c.client)}</div><div class="m"><span class="chip">${esc(c.norma)}</span> scade il ${fmtD(c.scadenza)}${c.ente ? ' · ' + esc(c.ente) : ''}</div></div>
+      ${na ? `<span class="pill p-ok" title="Prossimo audit">${firstDay(na) ? fmtD(firstDay(na)) : 'da fissare'}</span>` : `<button class="btn sm" data-action="plan-cert" data-id="${c.id}">${ic('plus')}Pianifica</button>`}
+    </div>`;
+  }).join('') || `<div class="empty">Nessuna scadenza nei prossimi 6 mesi</div>`;
+
+  // giornate per mese (12 mesi)
+  const months = []; const d0 = new Date(); d0.setDate(1);
+  for (let i = 0; i < 12; i++) { const d = new Date(d0.getFullYear(), d0.getMonth() + i, 1); months.push({ k: `${d.getFullYear()}-${pad(d.getMonth()+1)}`, l: MESI3[d.getMonth()], y: d.getFullYear(), per: {} }); }
+  for (const a of act) { if (['annullato', 'da_fissare'].includes(auditStatus(a))) continue;
+    for (const d of a.days) { const m = months.find(x => d.date && d.date.startsWith(x.k)); if (!m) continue;
+      const pp = (d.people && d.people.length) ? d.people : (a.incarico && a.incarico.length ? [a.incarico[0]] : ['?']);
+      const share = dayLoad(d) / pp.length; for (const p of pp) m.per[p] = (m.per[p] || 0) + share; } }
+  const maxM = Math.max(1, ...months.map(m => Object.values(m.per).reduce((s, x) => s + x, 0)));
+  const barsHtml = months.map(m => { const tot = Object.values(m.per).reduce((s, x) => s + x, 0);
+    return `<div class="bar" title="${m.l} ${m.y}: ${fmtNum(tot)} giornate"><b>${tot ? fmtNum(tot) : ''}</b><div class="stk" style="height:${tot / maxM * 100}%">${Object.entries(m.per).map(([p, v]) => `<div style="height:${v / tot * 100}%;background:${person(p).color}" title="${esc(person(p).name)}: ${fmtNum(v)}"></div>`).join('')}</div><small>${m.l}</small></div>`; }).join('');
+
+  // carico prossimi 60 gg
+  const t60 = addDays(t, 60);
+  const wl = people().map(p => {
+    let g = 0, inc = 0;
+    for (const a of act) { const st = auditStatus(a); if (!['confermato', 'da_confermare'].includes(st)) continue;
+      for (const d of a.days) if (d.date >= t && d.date <= t60 && (d.people || []).includes(p.id)) g += dayLoad(d);
+      if ((a.incarico || []).includes(p.id) && lastDay(a) >= t && firstDay(a) <= t60) inc++; }
+    return { p, g, inc };
+  });
+  const maxW = Math.max(1, ...wl.map(w => w.g));
+  const wlHtml = wl.map(w => `<div class="wl">${av(w.p.id)}<span class="nm">${esc(w.p.name)}</span><div class="track"><div style="width:${w.g / maxW * 100}%;background:${w.p.color}"></div></div><span class="v"><b>${fmtNum(w.g)}</b> gg · ${w.inc} incar.</span></div>`).join('');
+
+  const fixHtml = [...toFix.slice().sort((a, b) => (firstDay(a) || '9').localeCompare(firstDay(b) || '9')).slice(0, 5).map(a => `<div class="li" data-action="open-audit" data-id="${a.id}"><div class="main"><div class="t">${esc(a.client)}</div><div class="m">${chips((a.norme||[]).map(shortNorma))} ${esc(a.tipo)}${firstDay(a) ? ' · data indicativa ' + fmtDays(a.days) : ''}</div></div>${stPill(auditStatus(a))}${avs(a.incarico)}</div>`),
+    ...noPlan.slice(0, 4).map(c => `<div class="li" data-action="open-cert" data-id="${c.id}"><div class="main"><div class="t">${esc(c.client)}</div><div class="m"><span class="chip">${esc(c.norma)}</span> certificato in scadenza il ${fmtD(c.scadenza)}, nessun audit pianificato</div></div><button class="btn sm" data-action="plan-cert" data-id="${c.id}">${ic('plus')}Pianifica</button></div>`)].join('') || `<div class="empty">Tutto pianificato 🎉</div>`;
+
+  return `
+  <div class="hero"><div><h2>${saluto}${u ? ', ' + esc(u) : ''}</h2><p>Ecco la situazione di audit e certificati dello studio.</p></div></div>
+  <div class="kpis">
+    <button class="kpi k1" data-action="kpi" data-k="next30">${ic('cal', 'bgi')}<div class="l">Audit nei prossimi 30 giorni</div><div class="n">${next30.length}</div><div class="s">${fmtNum(gg30)} giornate · ${next30.filter(a => auditStatus(a) === 'da_confermare').length} da confermare</div></button>
+    <button class="kpi k2" data-action="kpi" data-k="fix">${ic('clock', 'bgi')}<div class="l">Da fissare o confermare</div><div class="n">${toFix.length}</div><div class="s">entro 60 gg · altri ${planCount} nel piano</div></button>
+    <button class="kpi k3" data-action="kpi" data-k="exp90">${ic('cert', 'bgi')}<div class="l">Certificati in scadenza</div><div class="n">${exp90.length}</div><div class="s">entro 90 giorni${noPlan.length ? ` · ${noPlan.length} senza audit` : ''}</div></button>
+    <button class="kpi k4" data-action="kpi" data-k="bad">${ic('alert', 'bgi')}<div class="l">Scaduti o da verificare</div><div class="n">${bad.length}</div><div class="s">aggiorna la data del nuovo certificato</div></button>
+  </div>
+  <div class="grid2">
+    <div class="card"><h3>${ic('cal')} Prossimi audit <button class="more" data-action="goto" data-view="calendar">Apri calendario →</button></h3>${upHtml}</div>
+    <div class="card"><h3>${ic('cert')} Certificati in scadenza <button class="more" data-action="kpi" data-k="exp180">Vedi tutti →</button></h3>${exHtml}</div>
+  </div>
+  <div class="grid3">
+    <div class="card"><h3>${ic('dash')} Giornate di audit per mese</h3><div class="bars">${barsHtml}</div>
+      <div class="legend">${people().map(p => `<span><i class="lg" style="background:${p.color}"></i>${esc(p.name)}</span>`).join('')}</div></div>
+    <div class="card"><h3>${ic('users')} Carico prossimi 60 giorni</h3>${wlHtml}<p class="hint" style="margin:10px 0 0">Giornate in presenza con l'ente e audit di cui la persona ha l'incarico.</p></div>
+  </div>
+  <div class="card" style="margin-top:18px"><h3>${ic('alert')} Da pianificare <button class="more" data-action="kpi" data-k="fix">Vedi tutti →</button></h3>${fixHtml}</div>`;
+}
+
+/* ================== CALENDARIO ================== */
+function vCal() {
+  const { y, m } = S.cal; const first = new Date(y, m, 1);
+  const start = new Date(first); start.setDate(1 - ((first.getDay() + 6) % 7));
+  const t = today(); const off = S.cal.off;
+  const evByDay = {};
+  for (const a of audits()) {
+    const st = auditStatus(a); if (st === 'annullato' || st === 'da_fissare') continue;
+    if (!matchQ(auditHay(a))) continue;
+    for (const d of a.days) {
+      if (!d.date) continue;
+      const pp = d.people && d.people.length ? d.people : (a.incarico || []);
+      if (pp.length && pp.every(p => off.includes(p))) continue;
+      (evByDay[d.date] ||= []).push({ a, d, st, pp });
+    }
+  }
+  const expByDay = {};
+  for (const c of certs()) if (matchQ(certHay(c))) (expByDay[c.scadenza] ||= []).push(c);
+  let cells = '';
+  for (let i = 0; i < 42; i++) {
+    const D = new Date(start); D.setDate(start.getDate() + i); const k = toISO(D);
+    const hol = holidays(D.getFullYear())[k];
+    const evs = (evByDay[k] || []).map(({ a, d, st, pp }) => {
+      const c = person(pp[0] || '').color;
+      return `<div class="ev ${st === 'da_confermare' ? 'tent' : ''} ${st === 'svolto' ? 'done' : ''}" style="background:${c};--c:${c}" data-action="open-audit" data-id="${a.id}" ${st !== 'svolto' ? `draggable="true" data-drag="${a.id}|${d.date}"` : ''} title="${st === 'da_confermare' ? 'DA CONFERMARE · ' : ''}${esc(a.client)} · ${esc((a.norme||[]).join(', '))} · ${esc(names(pp))}${d.remote ? ' · remoto' : ''}${d.half ? ' · ½ giornata' : ''}">${d.remote ? ic('mon') : ''}${d.half ? '½ ' : ''}${esc(a.client)} <span style="opacity:.8;font-weight:500">${esc((a.norme||[]).map(shortNorma).join('·'))}</span></div>`;
+    }).join('');
+    const exs = (expByDay[k] || []).map(c => `<div class="ev exp" data-action="open-cert" data-id="${c.id}" title="Scadenza certificato">${ic('cert')}${esc(c.client)} · ${esc(shortNorma(c.norma))}</div>`).join('');
+    cells += `<div class="cell ${D.getMonth() !== m ? 'out' : ''} ${D.getDay() % 6 === 0 ? 'we' : ''} ${hol ? 'hol' : ''} ${k === t ? 'today' : ''}" data-action="new-on" data-date="${k}"><div class="dn"><b>${D.getDate()}</b>${hol ? `<small>${hol}</small>` : ''}</div>${evs}${exs}</div>`;
+  }
+  // conteggio giornate nel mese
+  let tot = 0; for (const [k, list] of Object.entries(evByDay)) if (toD(k).getMonth() === m && toD(k).getFullYear() === y) tot += list.reduce((s, e) => s + dayLoad(e.d), 0);
+  return `<div class="calhead">
+      <button class="iconbtn" data-action="cal-nav" data-d="-1">${ic('l')}</button>
+      <h2>${MESI[m]} ${y}</h2>
+      <button class="iconbtn" data-action="cal-nav" data-d="1">${ic('r')}</button>
+      <button class="btn sm" data-action="cal-today">Oggi</button>
+      <span class="muted" style="font-weight:600;color:var(--ink3);margin-left:6px">${fmtNum(tot)} giornate nel mese</span>
+      <div class="ptfilter">${people().map(p => `<button class="pf ${off.includes(p.id) ? 'off' : ''}" style="--c:${p.color}" data-action="cal-person" data-p="${esc(p.id)}"><span class="pdot"></span>${esc(p.name)}</button>`).join('')}
+      <button class="btn sm ghost" data-action="print">${ic('print')}Stampa</button></div>
+    </div>
+    <div class="cal">${['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'].map(g => `<div class="dh">${g}</div>`).join('')}${cells}</div>
+    <div class="legend"><span><i class="lg" style="background:var(--brand)"></i>Confermato (colore = chi va in presenza)</span><span><i class="lg" style="border:1.5px dashed var(--brand);background:#fff"></i>Da confermare</span><span><i class="lg" style="background:var(--brand);opacity:.5"></i>Svolto</span><span><i class="lg" style="background:var(--badSoft);border-left:3px solid var(--bad)"></i>Scadenza certificato</span><span>${ic('mon')} Da remoto</span><span class="hint">Clicca su un giorno libero per creare un audit; trascina un audit per spostarlo.</span></div>`;
+}
+
+/* ================== LISTA AUDIT ================== */
+function filteredAudits() {
+  const f = S.fa, t = today();
+  return audits().filter(a => {
+    const st = auditStatus(a);
+    if (f.seg === 'prossimi' && !(['confermato', 'da_confermare'].includes(st) && lastDay(a) >= t) && st !== 'da_fissare') return false;
+    if (f.seg === 'next30' && !(['confermato', 'da_confermare'].includes(st) && a.days.some(d => d.date >= t && d.date <= addDays(t, 30)))) return false;
+    if (f.seg === 'fix' && !['da_fissare', 'da_confermare'].includes(st)) return false;
+    if (f.seg === 'fix60' && !(st === 'da_fissare' || (st === 'da_confermare' && firstDay(a) <= addDays(t, 60)))) return false;
+    if (f.seg === 'piano' && !(st === 'da_confermare' || st === 'confermato' || st === 'da_fissare')) return false;
+    if (f.seg === 'svolti' && st !== 'svolto') return false;
+    if (f.year && !(f.year === 'nd' ? !firstDay(a) : (firstDay(a) || '').startsWith(f.year))) return false;
+    if (f.person && !((a.incarico || []).includes(f.person) || a.days.some(d => (d.people || []).includes(f.person)))) return false;
+    if (f.norma && !(a.norme || []).includes(f.norma)) return false;
+    if (f.tipo && a.tipo !== f.tipo) return false;
+    return matchQ(auditHay(a));
+  }).sort((a, b) => {
+    const fa = firstDay(a), fb = firstDay(b);
+    if (!fa && !fb) return a.client.localeCompare(b.client); if (!fa) return -1; if (!fb) return 1;
+    return S.fa.seg === 'svolti' ? fb.localeCompare(fa) : fa.localeCompare(fb);
+  });
+}
+function vAudits() {
+  const f = S.fa; const list = filteredAudits();
+  const years = [...new Set(audits().map(a => firstDay(a).slice(0, 4)).filter(Boolean))].sort();
+  const normeUsed = [...new Set(audits().flatMap(a => a.norme || []))].sort();
+  let rows = '', grp = null, cnt = {};
+  for (const a of list) { const g = firstDay(a) ? firstDay(a).slice(0, 7) : 'nd'; cnt[g] = (cnt[g] || 0) + 1; }
+  for (const a of list) {
+    const g = firstDay(a) ? firstDay(a).slice(0, 7) : 'nd';
+    if (g !== grp) { grp = g; const lbl = g === 'nd' ? 'Da fissare (senza data)' : `${MESI[+g.slice(5) - 1]} ${g.slice(0, 4)}`; rows += `<tr class="grp"><td colspan="8">${lbl}<span>${cnt[g]} audit</span></td></tr>`; }
+    const st = auditStatus(a); const pp = [...new Set(a.days.flatMap(d => d.people || []))];
+    const gg = a.days.reduce((s, d) => s + dayLoad(d), 0);
+    rows += `<tr class="r ${st === 'annullato' ? 'strike' : ''}" data-action="open-audit" data-id="${a.id}">
+      <td style="white-space:nowrap"><b>${fmtDays(a.days)}</b><div class="muted">${gg ? fmtNum(gg) + (gg === 1 ? ' giornata' : ' giornate') : ''}${a.days.some(d => d.remote) ? ` · <span class="remote">${ic('mon')}remoto</span>` : ''}</div></td>
+      <td class="cl">${esc(a.client)}</td>
+      <td>${chips((a.norme||[]).map(shortNorma))}</td>
+      <td class="muted">${esc(a.tipo)}</td>
+      <td>${avs(a.incarico)}</td><td>${avs(pp)}</td>
+      <td class="muted" style="max-width:220px">${esc(a.ente)}${a.ente && a.auditor ? '<br>' : ''}${esc(a.auditor)}</td>
+      <td>${stPill(st)}</td></tr>`;
+  }
+  const opt = (v, l, cur) => `<option value="${esc(v)}" ${v === cur ? 'selected' : ''}>${esc(l)}</option>`;
+  return `<div class="toolbar">
+    <div class="seg">${[['prossimi', 'In programma'], ['next30', 'Prossimi 30 gg'], ['fix60', 'Da confermare entro 60 gg'], ['fix', 'Tutti da confermare'], ['svolti', 'Svolti'], ['tutti', 'Tutti']].map(([k, l]) => `<button class="${f.seg === k ? 'on' : ''}" data-action="fa-seg" data-v="${k}">${l}</button>`).join('')}</div>
+    <select class="sel" data-fa="year">${opt('', 'Tutti gli anni', f.year)}${years.map(y => opt(y, y, f.year)).join('')}${opt('nd', 'Senza data', f.year)}</select>
+    <select class="sel" data-fa="person">${opt('', 'Tutte le persone', f.person)}${people().map(p => opt(p.id, p.name, f.person)).join('')}</select>
+    <select class="sel" data-fa="norma">${opt('', 'Tutte le norme', f.norma)}${normeUsed.map(n => opt(n, n, f.norma)).join('')}</select>
+    <select class="sel" data-fa="tipo">${opt('', 'Tutti i tipi', f.tipo)}${S.db.settings.tipi.map(n => opt(n, n, f.tipo)).join('')}</select>
+    <span class="count">${list.length} audit</span>
+    <button class="btn sm" data-action="open-plan" title="Genera le ipotesi da confermare">${ic('cal')}Piano</button>
+    <button class="btn sm ghost" data-action="export-audits">${ic('dl')}Excel</button>
+    <button class="btn sm ghost" data-action="print">${ic('print')}Stampa</button>
+  </div>
+  <div class="card tblwrap"><table class="tbl"><thead><tr><th>Date</th><th>Cliente</th><th>Norme</th><th>Tipo</th><th>Incarico</th><th>In presenza</th><th>Ente / auditor</th><th>Stato</th></tr></thead>
+  <tbody>${rows || `<tr><td colspan="8"><div class="empty">Nessun audit con questi filtri</div></td></tr>`}</tbody></table></div>`;
+}
+
+/* ================== CERTIFICATI ================== */
+function filteredCerts() {
+  const f = S.fc;
+  return certs().filter(c => {
+    const st = certStatus(c);
+    if (f.seg === 'bad' && !['scaduto', 'verificare'].includes(st)) return false;
+    if (f.seg === 'exp90' && st !== 'urgente') return false;
+    if (f.seg === 'exp180' && !['urgente', 'presto', 'scaduto'].includes(st)) return false;
+    if (f.seg === 'noplan' && !(['urgente', 'presto', 'scaduto'].includes(st) && !nextAuditFor(c.client, c.norma))) return false;
+    if (f.norma && c.norma !== f.norma) return false;
+    if (f.person && !(c.referente || []).includes(f.person)) return false;
+    return matchQ(certHay(c));
+  }).sort((a, b) => a.scadenza.localeCompare(b.scadenza));
+}
+function vCerts() {
+  const f = S.fc, list = filteredCerts(), t = today();
+  const normeUsed = [...new Set(certs().map(c => c.norma))].sort();
+  const opt = (v, l, cur) => `<option value="${esc(v)}" ${v === cur ? 'selected' : ''}>${esc(l)}</option>`;
+  const rows = list.map(c => {
+    const st = certStatus(c), n = diff(c.scadenza, t), na = nextAuditFor(c.client, c.norma);
+    return `<tr class="r" data-action="open-cert" data-id="${c.id}">
+      <td class="cl">${esc(c.client)}</td><td><span class="chip">${esc(c.norma)}</span></td>
+      <td class="muted">${esc(c.ente) || '—'}${c.numero ? `<br>n. ${esc(c.numero)}` : ''}</td>
+      <td style="white-space:nowrap"><b>${fmtD(c.scadenza)}</b><div class="muted">${relDays(n)}</div></td>
+      <td><span class="pill ${CST[st].c}">${CST[st].l}</span></td>
+      <td>${na ? `<span class="muted"><b style="color:var(--ink)">${firstDay(na) ? fmtDays(na.days) : 'da fissare'}</b><br>${esc(na.tipo)}</span>` : '<span class="muted">—</span>'}</td>
+      <td>${avs(c.referente)}</td>
+      <td style="white-space:nowrap;text-align:right">
+        ${!na ? `<button class="btn sm" data-action="plan-cert" data-id="${c.id}" title="Crea un audit per questo certificato">${ic('plus')}Pianifica</button>` : ''}
+        <button class="btn sm ghost" data-action="renew-cert" data-id="${c.id}" title="Nuova scadenza +3 anni">${ic('renew')}</button></td></tr>`;
+  }).join('');
+  return `<div class="toolbar">
+    <div class="seg">${[['tutti', 'Tutti'], ['bad', 'Scaduti / da verificare'], ['exp90', 'Entro 90 gg'], ['exp180', 'Entro 6 mesi'], ['noplan', 'Senza audit pianificato']].map(([k, l]) => `<button class="${f.seg === k ? 'on' : ''}" data-action="fc-seg" data-v="${k}">${l}</button>`).join('')}</div>
+    <select class="sel" data-fc="norma">${opt('', 'Tutte le norme', f.norma)}${normeUsed.map(n => opt(n, n, f.norma)).join('')}</select>
+    <select class="sel" data-fc="person">${opt('', 'Tutti i referenti', f.person)}${people().map(p => opt(p.id, p.name, f.person)).join('')}</select>
+    <span class="count">${list.length} certificati</span>
+    <button class="btn sm ghost" data-action="export-certs">${ic('dl')}Excel</button>
+  </div>
+  <div class="card tblwrap"><table class="tbl"><thead><tr><th>Cliente</th><th>Norma</th><th>Ente</th><th>Scadenza</th><th>Stato</th><th>Prossimo audit</th><th>Referente</th><th></th></tr></thead>
+  <tbody>${rows || `<tr><td colspan="8"><div class="empty">Nessun certificato con questi filtri</div></td></tr>`}</tbody></table></div>`;
+}
+
+/* ================== CLIENTI ================== */
+function vClients() {
+  const t = today();
+  const cards = clientList().filter(c => matchQ(norm(c + ' ' + audits().filter(a => a.client === c).map(auditHay).join(' ') + certs().filter(x => x.client === c).map(certHay).join(' ')))).map(c => {
+    const ca = audits().filter(a => a.client === c), cc = certs().filter(x => x.client === c);
+    const nrm = [...new Set([...cc.map(x => x.norma), ...ca.flatMap(a => a.norme || [])])];
+    const na = ca.filter(a => ['confermato', 'da_confermare'].includes(auditStatus(a)) && lastDay(a) >= t).sort((a, b) => firstDay(a).localeCompare(firstDay(b)))[0];
+    const ns = cc.slice().sort((a, b) => a.scadenza.localeCompare(b.scadenza)).find(x => !['ok'].includes(certStatus(x))) || cc.slice().sort((a, b) => a.scadenza.localeCompare(b.scadenza))[0];
+    const warn = cc.some(x => ['scaduto', 'verificare', 'urgente'].includes(certStatus(x)));
+    return `<div class="cc" data-action="open-client" data-c="${esc(c)}">
+      <div class="hd"><div class="ini" style="background:${clientColor(c)}">${esc(initials(c.replace(/[^A-Za-z0-9 ]/g, ' ')) || '?')}</div><div class="nm">${esc(c)}</div>${warn ? `<span style="margin-left:auto;color:var(--warn)" title="Certificati da controllare">${ic('alert')}</span>` : ''}</div>
+      <div class="chips">${chips(nrm.map(shortNorma)) || '<span class="muted">Nessuna norma</span>'}</div>
+      <div class="ft"><div>Prossimo audit<b>${na ? fmtD(na.days.find(d => d.date >= t)?.date) : '—'}</b></div><div style="text-align:right">Scadenza più vicina<b>${ns ? fmtD(ns.scadenza) : '—'}</b></div></div></div>`;
+  }).join('');
+  return `<div class="toolbar"><span class="hint">Clicca un cliente per vederne audit e certificati, o per rinominarlo/unire due nomi doppi.</span><span class="count">${clientList().length} clienti</span></div>
+    <div class="cgrid">${cards || '<div class="empty">Nessun cliente trovato</div>'}</div>`;
+}
+
+/* ================== IMPOSTAZIONI ================== */
+function vSettings() {
+  const st = S.db.settings;
+  const tl = (key, label) => `<div class="card"><h3>${label}</h3><div class="taglist">${st[key].map((n, i) => `<span class="tag">${esc(n)}<button data-action="rm-list" data-k="${key}" data-i="${i}" title="Rimuovi">${ic('x')}</button></span>`).join('')}</div>
+    <div style="display:flex;gap:8px"><input class="inp" id="add-${key}" placeholder="Aggiungi…"><button class="btn" data-action="add-list" data-k="${key}">${ic('plus')}Aggiungi</button></div></div>`;
+  return `<div class="sgrid">
+    <div class="card"><h3>${ic('folder')} Archivio condiviso</h3>
+      <dl class="kv"><dt>Modalità</dt><dd>${S.mode === 'folder' ? 'Cartella condivisa' : 'Solo questo browser'}</dd>
+      <dt>Cartella</dt><dd>${S.mode === 'folder' ? esc(S.dir.name) : '—'}</dd>
+      <dt>File dati</dt><dd>${esc(FILE_NAME)}</dd>
+      <dt>Ultimo salvataggio</dt><dd>${S.lastSave ? S.lastSave.toLocaleString('it-IT') : '—'}</dd>
+      <dt>Contenuto</dt><dd>${audits().length} audit · ${certs().length} certificati · ${clientList().length} clienti</dd></dl>
+      <div class="btnrow">
+        <button class="btn pri" data-action="connect">${ic('folder')}${S.mode === 'folder' ? 'Cambia cartella' : 'Collega cartella'}</button>
+        ${S.mode === 'folder' ? `<button class="btn" data-action="sync-now">${ic('refresh')}Sincronizza ora</button>` : ''}
+        <button class="btn" data-action="open-plan">${ic('cal')}Piano audit</button>
+        <button class="btn" data-action="export-json">${ic('dl')}Scarica backup</button>
+        <button class="btn" data-action="import-json">${ic('ul')}Importa backup</button>
+      </div>
+      <p class="hint" style="margin-top:14px">Ogni giorno, al primo salvataggio, viene creata una copia nella sottocartella <b>${BACKUP_DIR}</b> (si tengono le ultime 60). Le modifiche fatte da più persone vengono unite record per record. Se Dropbox crea una «copia in conflitto», il programma la unisce da solo e la sposta in <b>${BACKUP_DIR}/${CONFLICT_DIR}</b>; se due persone modificano lo stesso audit nello stesso momento resta la versione più recente e l'altra viene archiviata nella stessa cartella, con un avviso. Nessuna modifica viene cancellata.</p>
+    </div>
+    <div class="card"><h3>${ic('users')} Team</h3>
+      ${st.people.map(p => `<div class="team">${av(p.id)}<div class="who2"><b>${esc(p.name)}</b><span>${esc([p.ruolo, p.email || 'email non inserita'].filter(Boolean).join(' · '))}</span></div><button class="btn sm" data-action="edit-profile" data-p="${esc(p.id)}">${ic('edit')}Modifica</button></div>`).join('')}
+      <button class="btn" style="margin-top:10px" data-action="new-profile">${ic('plus')}Aggiungi persona</button>
+      <div class="f" style="margin-top:18px"><span>Nome dello studio</span><input class="inp" value="${esc(st.studio || '')}" data-studio></div>
+    </div>
+    ${tl('norme', ic('cert') + ' Norme e schemi')}
+    ${tl('enti', ic('cert') + ' Enti di certificazione')}
+    ${tl('tipi', ic('list') + ' Tipi di audit')}
+    <div class="card"><h3>${ic('dl')} Esporta per Excel</h3><p class="hint">File CSV che si apre direttamente in Excel.</p><div class="btnrow"><button class="btn" data-action="export-audits">Audit</button><button class="btn" data-action="export-certs">Certificati</button></div></div>
+  </div>`;
+}
+
+/* ================== MODALI ================== */
+function blankAudit(extra = {}) {
+  return Object.assign({ id: uid(), client: '', norme: [], tipo: 'Sorveglianza', stato: 'da_fissare', days: [], incarico: S.user ? [S.user] : [], ente: '', auditor: '', note: '', _new: true }, extra);
+}
+function blankCert(extra = {}) {
+  return Object.assign({ id: uid(), client: '', norma: '', ente: '', numero: '', scadenza: addYears(today(), 3), referente: S.user ? [S.user] : [], verificare: false, note: '', _new: true }, extra);
+}
+function openAudit(a) { S.draft = clone(a); S.draftType = 'audit'; renderModal(true); }
+function openCert(c) { S.draft = clone(c); S.draftType = 'cert'; renderModal(true); }
+function openClient(c) { S.draft = { client: c, newName: c }; S.draftType = 'client'; renderModal(true); }
+function closeModal() { S.draft = null; S.draftType = null; $('#modal').innerHTML = ''; }
+
+function conflictsFor(day, selfId) {
+  if (!day.date) return [];
+  const out = [];
+  for (const a of audits()) {
+    if (a.id === selfId || auditStatus(a) === 'annullato') continue;
+    for (const d of a.days) if (d.date === day.date) for (const p of (day.people || [])) if ((d.people || []).includes(p)) out.push(`${person(p).name} è già da ${a.client}`);
+  }
+  return [...new Set(out)];
+}
+function personToggles(sel, action, extra = '', mini = false) {
+  return people().map(p => `<button type="button" class="pt ${mini ? 'mini' : ''} ${(sel || []).includes(p.id) ? 'on' : ''}" style="--c:${p.color}" data-action="${action}" data-p="${esc(p.id)}" ${extra} title="${esc(p.name)}">${mini ? av(p.id) : '<span class="pdot"></span>'}${mini ? '' : esc(p.name)}</button>`).join('');
+}
+function modalHtml() {
+  const M = { welcome: modalWelcome, audit: modalAudit, cert: modalCert, client: modalClient, who: modalWho, notify: modalNotify, plan: modalPlan, profile: modalProfile };
+  return M[S.draftType] ? M[S.draftType]() : '';
+}
+// aggiorna solo le parti "vive" della finestra, senza toccare il campo in cui si sta scrivendo
+function refreshLive() {
+  const tmp = document.createElement('div'); tmp.innerHTML = modalHtml();
+  $('#modal').querySelectorAll('[data-live]').forEach(el => { const n = tmp.querySelector(`[data-live="${el.dataset.live}"]`); if (n && n.innerHTML !== el.innerHTML) el.innerHTML = n.innerHTML; });
+}
+function renderModal(first) {
+  const root = $('#modal'); const prevScroll = root.querySelector('.mb')?.scrollTop || 0;
+  const html = modalHtml();
+  root.innerHTML = html;
+  const mb = root.querySelector('.mb'); if (mb) mb.scrollTop = prevScroll;
+  if (first) { const fi = root.querySelector('[data-autofocus]'); if (fi && !fi.value) setTimeout(() => fi.focus(), 50); }
+  else root.querySelectorAll('.ov,.md').forEach(e => e.style.animation = 'none');
+}
+const meta = r => r._new ? 'Nuovo' : (r.updatedBy ? `Modificato da ${esc(r.updatedBy)} · ${new Date(r.updatedAt).toLocaleString('it-IT', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}` : '');
+function confBox(a) {
+  if (a.stato === 'da_confermare') {
+    const miss = [!a.days.length && 'le giornate', !(a.auditor || '').trim() && "l'auditor"].filter(Boolean);
+    return `<div class="confbox tent">${ic('q')}<p><b>Audit da confermare.</b> Le date sono indicative${miss.length ? `: per confermarlo servono ${miss.join(' e ')}` : ''}. Quando giorni e auditor sono stabiliti, premi <b>Conferma audit</b>.</p></div>`;
+  }
+  if (a.stato === 'confermato' && !a._new) return `<div class="confbox ok">${ic('ok')}<p><b>Audit confermato.</b> ${a.avviso ? `Avviso inviato il ${new Date(a.avviso.data).toLocaleDateString('it-IT')} a ${esc(a.avviso.a)}.` : 'Nessun avviso email ancora inviato.'}</p></div>`;
+  return '';
+}
+function auditPeople(a) { return [...new Set([...(a.incarico || []), ...a.days.flatMap(d => d.people || [])])]; }
+function emailText(a) {
+  const nn = (a.norme || []).join(', ');
+  const subject = `Audit confermato – ${a.client}${nn ? ' – ' + nn : ''} – ${fmtDays(a.days)}`;
+  const lines = [
+    'Ciao,', 'confermato audit:', ' ',
+    `- Cliente: ${a.client}`, nn && `- Norme: ${nn}`, `- Tipo: ${a.tipo}`, '- Giornate:',
+    ...a.days.map(d => `   • ${fmtD(d.date, true)}${d.half ? ' (½ giornata)' : ''} – ${d.remote ? 'da remoto' : 'in presenza'}${(d.people || []).length ? ' – ' + names(d.people) : ''}`),
+    a.ente && `- Ente: ${a.ente}`, a.auditor && `- Auditor: ${a.auditor}`,
+    (a.incarico || []).length && `- Incarico: ${names(a.incarico)}`,
+    a.note && `- Note: ${a.note.replace(/\n/g, ' / ')}`, ' ',
+    S.user ? person(S.user).name : ''
+  ].filter(x => typeof x === 'string' && x).map(x => x === ' ' ? '' : x);
+  return { subject, body: lines.join('\n') };
+}
+function icsFor(a) {
+  const e = s => String(s || '').replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+  const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+  const { body } = emailText(a);
+  const ev = a.days.map(d => ['BEGIN:VEVENT', `UID:${a.id}-${d.date}@scadenzario-audit`, `DTSTAMP:${stamp}`,
+    `DTSTART;VALUE=DATE:${d.date.replace(/-/g, '')}`, `DTEND;VALUE=DATE:${addDays(d.date, 1).replace(/-/g, '')}`,
+    `SUMMARY:${e(`Audit ${a.client} (${(a.norme || []).map(shortNorma).join(', ')})${d.remote ? ' – remoto' : ''}`)}`,
+    `DESCRIPTION:${e(body)}`, 'TRANSP:OPAQUE', 'END:VEVENT'].join('\r\n'));
+  return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Scadenzario Audit//IT', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', ...ev, 'END:VCALENDAR'].join('\r\n');
+}
+function modalNotify() {
+  const a = S.db.audits.find(x => x.id === S.draft.id) || S.draft; const sel = S.draft.sel;
+  const inv = auditPeople(a);
+  const rows = [...people()].sort((x, y) => inv.includes(y.id) - inv.includes(x.id)).map(p => `<label class="nrow"><input type="checkbox" ${sel.includes(p.id) ? 'checked' : ''} data-notify-sel="${esc(p.id)}">${av(p.id)}<span class="nm">${esc(p.name)}</span>
+    ${p.email ? `<span class="em">${esc(p.email)}</span>` : `<input type="email" placeholder="manca l'email: scrivila qui" data-notify-email="${esc(p.id)}">`}</label>`).join('');
+  return `<div class="ov center" data-action="ov-close"><div class="md" style="width:min(560px,94vw)">
+    <div class="mh"><h3>${ic('mail')} Avvisa chi prende in carico l'audit</h3><button class="iconbtn" data-action="close">${ic('x')}</button></div>
+    <div class="mb"><div class="confbox ok">${ic('ok')}<p><b>${esc(a.client)}</b> · ${esc((a.norme || []).join(', '))}<br>${fmtDays(a.days)}${a.auditor ? ' · auditor ' + esc(a.auditor) : ''}</p></div>
+      <div class="hint">Sono già selezionate le persone incaricate o presenti all'audit.</div>
+      <div class="nlist">${rows}</div>
+      <p class="hint" style="margin:0">«Prepara email» apre il tuo programma di posta (es. Outlook) con il messaggio già compilato: controlla e premi Invia. L'invito calendario (.ics) si può allegare all'email o aprire per aggiungere le giornate al proprio calendario.</p></div>
+    <div class="mf"><button class="btn ghost" data-action="close">Non ora</button><span class="sp"></span>
+      <button class="btn" data-action="dl-ics">${ic('cal')}Invito calendario</button>
+      <button class="btn pri" data-action="send-mail">${ic('mail')}Prepara email</button></div></div></div>`;
+}
+function modalPlan() {
+  const until = S.draft.until; const list = planProposals(S.db, until);
+  const conf = audits().filter(a => auditStatus(a) === 'confermato' && firstDay(a) > today() && firstDay(a) <= until).length;
+  const tent = audits().filter(a => auditStatus(a) === 'da_confermare' && firstDay(a) <= until).length;
+  return `<div class="ov center" data-action="ov-close"><div class="md" style="width:min(620px,94vw)">
+    <div class="mh"><h3>${ic('cal')} Piano audit</h3><button class="iconbtn" data-action="close">${ic('x')}</button></div>
+    <div class="mb">
+      <p class="hint" style="margin-top:0">Per ogni cliente e norma il programma prende l'ultimo audit e propone il successivo a 12 mesi (stesso giorno della settimana, saltando le festività), come <b>da confermare</b>. Il piano si estende da solo a ${PLAN_MONTHS} mesi ogni mese; qui puoi allungarlo, per esempio a inizio anno fino al 31 dicembre.</p>
+      <div class="f" style="max-width:240px"><span>Pianifica fino al</span><input type="date" value="${until}" data-plan-until></div>
+      <div class="btnrow" style="margin:10px 0 16px">${[['+15 mesi', addMonths(today(), 15)], [`31/12/${new Date().getFullYear() + 1}`, `${new Date().getFullYear() + 1}-12-31`], ['+24 mesi', addMonths(today(), 24)]].map(([l, v]) => `<button class="btn sm ${v === until ? 'pri' : ''}" data-action="plan-until" data-v="${v}">${l}</button>`).join('')}</div>
+      <div data-live="plan"><div class="confbox tent">${ic('q')}<p>Fino al ${fmtD(until)}: <b>${conf}</b> confermati, <b>${tent}</b> già da confermare, <b>${list.length}</b> nuove ipotesi da aggiungere.</p></div>
+      <div class="rel" style="margin-top:0;max-height:300px;overflow:auto">${list.map(a => `<div class="rr"><b style="width:150px">${fmtDays(a.days)}</b><span class="grow">${esc(a.client)} · ${esc(a.norme.join(', '))}</span><span class="muted">${esc(a.tipo)}</span></div>`).join('') || '<div class="hint">Nessuna nuova ipotesi: il piano copre già il periodo.</div>'}</div></div>
+    </div>
+    <div class="mf"><span class="sp"></span><button class="btn" data-action="close">Chiudi</button><span data-live="plangen" style="display:contents"><button class="btn pri" data-action="gen-plan" ${list.length ? '' : 'disabled'}>${ic('plus')}Aggiungi ${list.length} ipotesi</button></span></div></div></div>`;
+}
+const PALETTE = ['#4f46e5', '#0891b2', '#db2777', '#ea580c', '#16a34a', '#7c3aed', '#ca8a04', '#0d9488', '#dc2626', '#2563eb', '#9333ea', '#475569'];
+function openProfile(id) {
+  const p = people().find(x => x.id === id);
+  S.draft = p ? Object.assign({ sigla: '', ruolo: '', email: '' }, clone(p)) : { id: '', name: '', sigla: '', ruolo: '', email: '', color: PALETTE[people().length % PALETTE.length], _new: true };
+  S.draftType = 'profile'; renderModal(true);
+}
+function modalProfile() {
+  const p = S.draft; const sg = (p.sigla || initials(p.name || '?')).slice(0, 3);
+  return `<div class="ov center" data-action="ov-close"><div class="md" style="width:min(540px,94vw)">
+    <div class="mh"><h3>${p._new ? 'Nuova persona' : 'Profilo'}</h3><button class="iconbtn" data-action="close">${ic('x')}</button></div>
+    <div class="mb">
+      <div class="profhead" data-live="prof"><span class="av big" style="background:${p.color}">${esc(sg)}</span><div><b>${esc(p.name || 'Nome')}</b><div class="hint">${esc([p.ruolo, p.email].filter(Boolean).join(' · ') || 'Ruolo ed email')}</div></div></div>
+      <div class="fg">
+        <label class="f"><span>Nome visualizzato *</span><input value="${esc(p.name)}" data-bind="name" data-live-up data-autofocus placeholder="es. Mauro"></label>
+        <label class="f"><span>Sigla nel pallino</span><input value="${esc(p.sigla)}" maxlength="3" data-bind="sigla" data-live-up placeholder="${esc(initials(p.name || '') || 'es. MZ')}"></label>
+        <label class="f"><span>Ruolo</span><input value="${esc(p.ruolo)}" data-bind="ruolo" data-live-up placeholder="es. Consulente, auditor"></label>
+        <label class="f"><span>Email per gli avvisi</span><input type="email" value="${esc(p.email)}" data-bind="email" data-live-up placeholder="nome@studio.it"></label>
+        <div class="f full"><span>Colore</span><div class="swatches">${PALETTE.map(c => `<button type="button" class="sw ${c === p.color ? 'on' : ''}" style="background:${c}" data-action="pick-color" data-c="${c}" title="${c}"></button>`).join('')}<input type="color" value="${p.color}" data-bind="color" data-rerender title="Altro colore"></div></div>
+      </div>
+      <p class="hint" style="margin-bottom:0">Le modifiche valgono per tutti e si vedono in calendario, negli elenchi e negli avvisi. Gli audit già assegnati restano collegati alla persona.</p>
+    </div>
+    <div class="mf">${p._new ? '' : `<button class="btn danger" data-action="rm-profile">${ic('trash')}Rimuovi</button>`}<span class="sp"></span><button class="btn" data-action="close">Annulla</button><button class="btn pri" data-action="save-profile">Salva</button></div></div></div>`;
+}
+function modalWelcome() {
+  return `<div class="ov center"><div class="md"><div class="mb" style="padding:28px">
+    <div class="logo" style="margin-bottom:14px">${ic('folder')}</div>
+    <h3 style="margin:0 0 6px;font-size:20px">Collega l'archivio condiviso</h3>
+    <p class="hint" style="margin:0 0 18px">Scegli la cartella Dropbox che contiene il file <b>${esc(FILE_NAME)}</b>. Il browser chiederà il permesso: scegli <b>«Consenti a ogni visita»</b>, così la cartella resta collegata.</p>
+    ${fsSupported ? `<button class="btn pri" data-action="connect">${ic('folder')}Scegli la cartella</button>` : `<div class="banner warn" style="margin:0">${ic('alert')}<p>Apri il programma con Google Chrome o Microsoft Edge.</p></div>`}
+    <button class="btn ghost" data-action="close" style="margin-left:6px">Più tardi</button>
+  </div></div></div>`;
+}
+function openNotify(a) { S.draft = { id: a.id, sel: auditPeople(a).filter(id => people().some(p => p.id === id)) }; S.draftType = 'notify'; renderModal(true); }
+function modalAudit() {
+  const a = S.draft; const st = S.db.settings;
+  const quick = ['ISO 9001', 'ISO 14001', 'ISO 45001', 'EN 1090', 'ISO 3834', 'SA8000', 'UNI/PdR 125', 'FSC', 'PEFC', 'IATF 16949', 'ISO 27001'].filter(n => !a.norme.includes(n));
+  const days = a.days.map((d, i) => { const cf = conflictsFor(d, a.id); return `<div class="day">
+      <input type="date" value="${d.date || ''}" data-bind="days.${i}.date" data-live-up>
+      <select data-bind="days.${i}.remote" data-type="bool"><option value="false">In presenza</option><option value="true" ${d.remote ? 'selected' : ''}>Da remoto</option></select>
+      <select data-bind="days.${i}.half" data-type="bool" data-rerender><option value="false">Giornata intera</option><option value="true" ${d.half ? 'selected' : ''}>Mezza giornata</option></select>
+      <div class="ptogs" title="Chi è presente con l'ente">${personToggles(d.people, 'tog-day', `data-i="${i}"`, true)}</div>
+      <button type="button" class="iconbtn" data-action="rm-day" data-i="${i}" title="Rimuovi giornata">${ic('trash')}</button>
+      <div class="cfw" data-live="cf-${i}">${cf.length ? `<div class="cf">${ic('alert')}${esc(cf.join(' · '))}</div>` : ''}</div></div>`; }).join('');
+  const ac = (a.client || '').trim().toUpperCase();
+  const rc = ac ? certs().filter(c => c.client === ac) : [];
+  const ra = ac ? audits().filter(x => x.client === ac && x.id !== a.id).sort((x, y) => (firstDay(y) || '9').localeCompare(firstDay(x) || '9')).slice(0, 4) : [];
+  const gg = a.days.reduce((s, d) => s + dayLoad(d), 0);
+  return `<div class="ov" data-action="ov-close"><div class="md">
+    <div class="mh"><h3>${a._new ? 'Nuovo audit' : esc(a.client || 'Audit')}</h3><span class="meta">${meta(a)}</span><button class="iconbtn" data-action="close">${ic('x')}</button></div>
+    <div class="mb">${confBox(a)}<div class="fg">
+      <label class="f full"><span>Cliente *</span><input list="dl-clients" value="${esc(a.client)}" data-bind="client" data-live-up data-upper data-autofocus placeholder="Nome dell'azienda"></label>
+      <div class="f full"><span>Norme / schemi</span>
+        <div class="chipsedit">${a.norme.map((n, i) => `<span class="tag">${esc(n)}<button type="button" data-action="rm-norma" data-i="${i}">${ic('x')}</button></span>`).join('')}<input list="dl-norme" placeholder="${a.norme.length ? 'Aggiungi…' : 'Scegli o scrivi una norma e premi Invio'}" data-addnorma></div>
+        <div class="quick">${quick.map(n => `<button type="button" data-action="add-norma" data-n="${esc(n)}">+ ${esc(shortNorma(n))}</button>`).join('')}</div></div>
+      <label class="f"><span>Tipo di audit</span><select data-bind="tipo">${st.tipi.map(t => `<option ${t === a.tipo ? 'selected' : ''}>${esc(t)}</option>`).join('')}${st.tipi.includes(a.tipo) ? '' : `<option selected>${esc(a.tipo)}</option>`}</select></label>
+      <label class="f"><span>Stato</span><select data-bind="stato" data-rerender>${['da_fissare', 'da_confermare', 'confermato', 'annullato'].map(s => `<option value="${s}" ${s === a.stato ? 'selected' : ''}>${STATI[s].l}</option>`).join('')}</select></label>
+      <div class="f full"><span>Giornate di audit ${gg ? `· ${fmtNum(gg)} gg` : ''}</span>
+        <div class="days">${days || `<div class="hint">Nessuna data: l'audit resta tra quelli <b>da fissare</b>.</div>`}</div>
+        <div><button type="button" class="btn sm" data-action="add-day" style="margin-top:4px">${ic('plus')}Aggiungi giornata</button> <span class="hint">&nbsp;Le icone accanto a ogni data indicano chi è presente con l'ente.</span></div></div>
+      <div class="f full"><span>Consulenti incaricati</span><div class="ptogs">${personToggles(a.incarico, 'tog-inc')}</div></div>
+      <label class="f"><span>Ente di certificazione</span><input list="dl-enti" value="${esc(a.ente)}" data-bind="ente" placeholder="es. CSQA"></label>
+      <label class="f"><span>Auditor ${a.stato === 'confermato' || a.stato === 'da_confermare' ? '<b style="color:var(--bad)">*</b>' : ''}</span><input value="${esc(a.auditor)}" data-bind="auditor" placeholder="Nome dell'auditor"></label>
+      <label class="f full"><span>Note</span><textarea data-bind="note" placeholder="Annotazioni, documenti da preparare…">${esc(a.note)}</textarea></label>
+    </div>
+    <div data-live="rel">${a.client && (rc.length || ra.length) ? `<div class="rel">
+      ${rc.length ? `<h4>Certificati di ${esc(a.client)}</h4>${rc.map(c => `<div class="rr"><span class="chip">${esc(c.norma)}</span><span class="grow">scade il ${fmtD(c.scadenza)}</span><span class="pill ${CST[certStatus(c)].c}">${CST[certStatus(c)].l}</span></div>`).join('')}` : ''}
+      ${ra.length ? `<h4 style="margin-top:12px">Altri audit</h4>${ra.map(x => `<div class="rr"><span class="grow">${fmtDays(x.days)} · ${esc((x.norme||[]).join(', '))}</span>${stPill(auditStatus(x))}</div>`).join('')}` : ''}
+    </div>` : ''}</div>
+    </div>
+    <div class="mf">${a._new ? '' : `<button class="btn danger" data-action="del-audit">${ic('trash')}Elimina</button><button class="btn ghost" data-action="dup-audit" title="Crea l'audit ipotetico a 12 mesi (da confermare)">${ic('copy')}Ipotesi a 12 mesi</button>`}
+      ${!a._new && a.stato === 'confermato' ? `<button class="btn ghost" data-action="notify-draft">${ic('mail')}Avvisa</button>` : ''}
+      <span class="sp"></span><button class="btn" data-action="close">Annulla</button>
+      ${a.stato !== 'confermato' && a.stato !== 'annullato' ? `<button class="btn" data-action="confirm-audit">${ic('ok')}Conferma audit</button>` : ''}
+      <button class="btn pri" data-action="save-audit">Salva</button></div>
+  </div></div>`;
+}
+function modalCert() {
+  const c = S.draft; const na = c.client && c.norma ? nextAuditFor(c.client.trim().toUpperCase(), c.norma) : null;
+  return `<div class="ov" data-action="ov-close"><div class="md">
+    <div class="mh"><h3>${c._new ? 'Nuovo certificato' : esc(c.client)}</h3><span class="meta">${meta(c)}</span><button class="iconbtn" data-action="close">${ic('x')}</button></div>
+    <div class="mb"><div class="fg">
+      <label class="f full"><span>Cliente *</span><input list="dl-clients" value="${esc(c.client)}" data-bind="client" data-upper data-live-up data-autofocus></label>
+      <label class="f"><span>Norma / schema *</span><input list="dl-norme" value="${esc(c.norma)}" data-bind="norma" data-live-up placeholder="es. ISO 9001"></label>
+      <label class="f"><span>Scadenza *</span><input type="date" value="${c.scadenza || ''}" data-bind="scadenza" data-live-up></label>
+      <label class="f"><span>Ente di certificazione</span><input list="dl-enti" value="${esc(c.ente)}" data-bind="ente"></label>
+      <label class="f"><span>N. certificato</span><input value="${esc(c.numero)}" data-bind="numero"></label>
+      <div class="f full"><span>Referente dello studio</span><div class="ptogs">${personToggles(c.referente, 'tog-ref')}</div></div>
+      <label class="check full" style="grid-column:1/-1"><input type="checkbox" ${c.verificare ? 'checked' : ''} data-bind="verificare" data-type="check">Data da verificare (es. scadenza vecchia importata dall'Excel)</label>
+      <label class="f full"><span>Note</span><textarea data-bind="note">${esc(c.note)}</textarea></label>
+    </div>
+    <div data-live="certinfo">${c.scadenza && c.scadenza >= '1900' ? `<div class="rel"><div class="rr"><span class="grow"><b>Stato:</b> scade il ${fmtD(c.scadenza)} (${relDays(diff(c.scadenza, today()))})</span><span class="pill ${CST[certStatus(c)].c}">${CST[certStatus(c)].l}</span></div>
+      <div class="rr"><span class="grow"><b>Prossimo audit:</b> ${na ? `${firstDay(na) ? fmtDays(na.days) : 'da fissare'} · ${esc(na.tipo)}` : 'nessuno pianificato'}</span>${na ? `<button class="btn sm" data-action="open-audit" data-id="${na.id}">Apri</button>` : ''}</div></div>` : ''}</div>
+    </div>
+    <div class="mf">${c._new ? '' : `<button class="btn danger" data-action="del-cert">${ic('trash')}Elimina</button>`}
+      <button class="btn ghost" data-action="renew-draft" title="Sposta la scadenza di 3 anni">${ic('renew')}Rinnova +3 anni</button>
+      ${!c._new ? `<button class="btn ghost" data-action="plan-draft">${ic('plus')}Pianifica audit</button>` : ''}
+      <span class="sp"></span><button class="btn" data-action="close">Annulla</button><button class="btn pri" data-action="save-cert">Salva</button></div>
+  </div></div>`;
+}
+function modalClient() {
+  const c = S.draft.client; const t = today();
+  const ca = audits().filter(a => a.client === c).sort((x, y) => (firstDay(y) || '9').localeCompare(firstDay(x) || '9'));
+  const cc = certs().filter(x => x.client === c).sort((x, y) => x.scadenza.localeCompare(y.scadenza));
+  return `<div class="ov" data-action="ov-close"><div class="md">
+    <div class="mh"><div class="ini" style="width:38px;height:38px;border-radius:11px;display:grid;place-items:center;color:#fff;font-weight:800;background:${clientColor(c)}">${esc(initials(c.replace(/[^A-Za-z0-9 ]/g, ' ')))}</div><h3>${esc(c)}</h3><button class="iconbtn" data-action="close">${ic('x')}</button></div>
+    <div class="mb">
+      <div class="f"><span>Rinomina cliente</span><div style="display:flex;gap:8px"><input class="inp" list="dl-clients" value="${esc(S.draft.newName)}" data-bind="newName" data-upper><button class="btn" data-action="rename-client">${ic('edit')}Rinomina</button></div>
+      <span class="hint" style="text-transform:none;font-weight:500;letter-spacing:0">Se scegli il nome di un cliente già esistente, i due vengono uniti.</span></div>
+      <div class="rel"><h4>Certificati (${cc.length})</h4>${cc.map(x => `<div class="rr" style="cursor:pointer" data-action="open-cert" data-id="${x.id}"><span class="chip">${esc(x.norma)}</span><span class="grow">scade il ${fmtD(x.scadenza)}${x.ente ? ' · ' + esc(x.ente) : ''}</span><span class="pill ${CST[certStatus(x)].c}">${CST[certStatus(x)].l}</span></div>`).join('') || '<div class="hint">Nessun certificato registrato</div>'}
+      <button class="btn sm" style="margin-top:8px" data-action="new-cert-for" data-c="${esc(c)}">${ic('plus')}Certificato</button></div>
+      <div class="rel"><h4>Audit (${ca.length})</h4>${ca.map(x => `<div class="rr" style="cursor:pointer" data-action="open-audit" data-id="${x.id}"><span class="grow"><b>${fmtDays(x.days)}</b> · ${esc((x.norme||[]).join(', '))} · ${esc(x.tipo)}</span>${avs(x.incarico)}${stPill(auditStatus(x))}</div>`).join('') || '<div class="hint">Nessun audit</div>'}
+      <button class="btn sm" style="margin-top:8px" data-action="new-audit-for" data-c="${esc(c)}">${ic('plus')}Audit</button></div>
+    </div></div></div>`;
+}
+function modalWho() {
+  return `<div class="ov center"><div class="md"><div class="mb" style="padding:28px">
+    <div class="logo" style="margin-bottom:14px">${ic('users')}</div>
+    <h3 style="margin:0 0 6px;font-size:20px">Benvenuto! Chi sei?</h3>
+    <p class="hint" style="margin:0">Serve solo per sapere chi ha fatto l'ultima modifica e per personalizzare la dashboard. Puoi cambiarlo quando vuoi dal menu a sinistra.</p>
+    <div class="who">${people().map(p => `<button data-action="set-user" data-p="${esc(p.id)}">${av(p.id)}${esc(p.name)}</button>`).join('')}</div>
+  </div></div></div>`;
+}
+
+/* ================== azioni ================== */
+function setPath(obj, path, val) { const ks = path.split('.'); let o = obj; for (let i = 0; i < ks.length - 1; i++) o = o[isNaN(ks[i]) ? ks[i] : +ks[i]]; o[ks[ks.length - 1]] = val; }
+function saveAudit(confirming) {
+  const a = S.draft; a.client = (a.client || '').trim().toUpperCase();
+  if (!a.client) { toast('Inserisci il nome del cliente', true); return; }
+  a.days = a.days.filter(d => d.date).sort((x, y) => x.date.localeCompare(y.date));
+  if (!a.days.length && a.stato !== 'annullato') a.stato = 'da_fissare';
+  if (a.days.length && a.stato === 'da_fissare') a.stato = 'da_confermare';
+  if (a.stato === 'confermato' && !(a.auditor || '').trim()) {
+    if (confirming) { S.draft.stato = 'da_confermare'; renderModal(); toast("Per confermare l'audit inserisci l'auditor", true); setTimeout(() => $('[data-bind=auditor]')?.focus(), 50); return; }
+    if (!confirm("Un audit si conferma quando giornate e auditor sono stabiliti: manca l'auditor.\nLo salvo come «Da confermare»?")) return;
+    a.stato = 'da_confermare';
+  }
+  if (a.stato === 'confermato' && a.ipotesi) { a.ipotesi = false; a.note = (a.note || '').split('\n').filter(l => !l.startsWith('Ipotesi a 12 mesi')).join('\n'); }
+  const prev = S.db.audits.find(x => x.id === a.id);
+  const justConfirmed = a.stato === 'confermato' && (!prev || prev.stato !== 'confermato');
+  const isNew = a._new; delete a._new; upsert('audits', a); closeModal();
+  if (justConfirmed) { toast('Audit confermato'); openNotify(a); } else toast(isNew ? 'Audit creato' : 'Audit salvato');
+}
+function nextWorkday(s) { let d = s; do { d = addDays(d, 1); } while ([0, 6].includes(toD(d).getDay()) || holidays(toD(d).getFullYear())[d]); return d; }
+function toggle(arr, v) { const i = arr.indexOf(v); if (i >= 0) arr.splice(i, 1); else arr.push(v); }
+function csv(rows, name) {
+  const s = '﻿' + rows.map(r => r.map(v => { v = String(v ?? ''); return /[;"\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v; }).join(';')).join('\r\n');
+  download(new Blob([s], { type: 'text/csv;charset=utf-8' }), name);
+}
+function download(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
+const itD = s => s ? s.split('-').reverse().join('/') : '';
+function planFromCert(c) {
+  const n = diff(c.scadenza, today());
+  openAudit(blankAudit({ client: c.client, norme: [c.norma], tipo: n <= 200 ? 'Ricertificazione' : 'Sorveglianza', ente: c.ente, incarico: c.referente?.length ? [...c.referente] : (S.user ? [S.user] : []), note: `Certificato in scadenza il ${fmtD(c.scadenza)}` }));
+}
+
+const A = {
+  goto: el => { S.view = el.dataset.view; localStorage.setItem('scad-view', S.view); window.scrollTo(0, 0); render(); },
+  kpi: el => { const k = el.dataset.k;
+    if (k === 'next30') { S.view = 'audits'; S.fa = { seg: 'next30', year: '', person: '', norma: '', tipo: '' }; }
+    if (k === 'fix') { S.view = 'audits'; S.fa = { seg: 'fix60', year: '', person: '', norma: '', tipo: '' }; }
+    if (k === 'exp90') { S.view = 'certs'; S.fc = { seg: 'exp90', norma: '', person: '' }; }
+    if (k === 'exp180') { S.view = 'certs'; S.fc = { seg: 'exp180', norma: '', person: '' }; }
+    if (k === 'bad') { S.view = 'certs'; S.fc = { seg: 'bad', norma: '', person: '' }; }
+    render(); },
+  'new-audit': () => openAudit(blankAudit()),
+  'new-cert': () => openCert(blankCert()),
+  'new-audit-for': el => openAudit(blankAudit({ client: el.dataset.c })),
+  'new-cert-for': el => openCert(blankCert({ client: el.dataset.c })),
+  'new-on': (el, e) => { if (e.target.closest('.ev')) return; openAudit(blankAudit({ stato: 'confermato', days: [{ date: el.dataset.date, remote: false, half: false, people: S.user ? [S.user] : [] }] })); },
+  'open-audit': (el, e) => { e.stopPropagation(); const a = S.db.audits.find(x => x.id === el.dataset.id); if (a) openAudit(a); },
+  'open-cert': (el, e) => { if (e.target.closest('button') && e.target.closest('button') !== el) return; const c = S.db.certs.find(x => x.id === el.dataset.id); if (c) openCert(c); },
+  'open-client': el => openClient(el.dataset.c),
+  'plan-cert': (el, e) => { e.stopPropagation(); const c = S.db.certs.find(x => x.id === el.dataset.id); if (c) planFromCert(c); },
+  'renew-cert': (el, e) => { e.stopPropagation(); const c = clone(S.db.certs.find(x => x.id === el.dataset.id)); const nd = addYears(c.scadenza < today() ? c.scadenza : c.scadenza, 3);
+    if (!confirm(`Rinnovare il certificato ${c.norma} di ${c.client}?\nNuova scadenza: ${fmtD(nd)}`)) return; c.scadenza = nd; c.verificare = false; upsert('certs', c); toast('Certificato rinnovato'); },
+  close: () => closeModal(),
+  'ov-close': (el, e) => { if (e.target === el) closeModal(); },
+  'cal-nav': el => { let { y, m } = S.cal; m += +el.dataset.d; if (m < 0) { m = 11; y--; } if (m > 11) { m = 0; y++; } S.cal.y = y; S.cal.m = m; render(); },
+  'cal-today': () => { const d = new Date(); S.cal.y = d.getFullYear(); S.cal.m = d.getMonth(); render(); },
+  'cal-person': el => { toggle(S.cal.off, el.dataset.p); render(); },
+  'fa-seg': el => { S.fa.seg = el.dataset.v; render(); },
+  'fc-seg': el => { S.fc.seg = el.dataset.v; render(); },
+  print: () => window.print(),
+  connect: () => connectFolder(),
+  reconnect: () => reconnect(),
+  'sync-now': async () => { await poll(); await writeFolder(); toast('Sincronizzazione completata'); },
+  // editor audit
+  'add-norma': el => { if (!S.draft.norme.includes(el.dataset.n)) S.draft.norme.push(el.dataset.n); renderModal(); },
+  'rm-norma': el => { S.draft.norme.splice(+el.dataset.i, 1); renderModal(); },
+  'add-day': () => { const d = S.draft; const last = d.days.map(x => x.date).filter(Boolean).sort().pop();
+    const prev = d.days[d.days.length - 1];
+    d.days.push({ date: last ? nextWorkday(last) : today(), remote: false, half: false, people: prev ? [...(prev.people || [])] : (S.user ? [S.user] : []) });
+    if (d.stato === 'da_fissare') d.stato = 'confermato'; renderModal(); },
+  'rm-day': el => { S.draft.days.splice(+el.dataset.i, 1); if (!S.draft.days.length) S.draft.stato = 'da_fissare'; renderModal(); },
+  'tog-day': el => { const d = S.draft.days[+el.dataset.i]; d.people ||= []; toggle(d.people, el.dataset.p); renderModal(); },
+  'tog-inc': el => { toggle(S.draft.incarico, el.dataset.p); renderModal(); },
+  'tog-ref': el => { S.draft.referente ||= []; toggle(S.draft.referente, el.dataset.p); renderModal(); },
+  'save-audit': () => saveAudit(),
+  'edit-profile': el => openProfile(el.dataset.p),
+  'new-profile': () => openProfile(null),
+  'pick-color': el => { S.draft.color = el.dataset.c; renderModal(); },
+  'save-profile': () => { const p = S.draft; p.name = (p.name || '').trim(); if (!p.name) { toast('Inserisci il nome', true); return; }
+    p.sigla = (p.sigla || '').trim().toUpperCase().slice(0, 3); p.ruolo = (p.ruolo || '').trim(); p.email = (p.email || '').trim();
+    const list = S.db.settings.people;
+    if (p._new) { let id = norm(p.name).toUpperCase().replace(/[^A-Z0-9]/g, '') || 'P'; while (list.some(x => x.id === id)) id += '2'; p.id = id; delete p._new; list.push(p); }
+    else { const i = list.findIndex(x => x.id === p.id); if (i >= 0) list[i] = p; }
+    closeModal(); saveSettings(); toast('Profilo salvato'); },
+  'rm-profile': () => { const p = S.draft; if (!confirm(`Rimuovere ${p.name} dal team? Gli audit già assegnati restano invariati.`)) return;
+    S.db.settings.people = S.db.settings.people.filter(x => x.id !== p.id); closeModal(); saveSettings(); },
+  'open-plan': () => { S.draft = { until: addMonths(today(), PLAN_MONTHS) }; S.draftType = 'plan'; renderModal(true); },
+  'plan-until': el => { S.draft.until = el.dataset.v; renderModal(); },
+  'gen-plan': () => { const n = applyPlan(S.db, S.draft.until); persist(); closeModal(); S.view = 'audits'; S.fa = { seg: 'fix', year: '', person: '', norma: '', tipo: '' }; render(); toast(`${n} ipotesi aggiunte al piano`); },
+  'confirm-audit': () => { S.draft.stato = 'confermato'; saveAudit(true); },
+  'notify-draft': () => { const a = S.draft; if (a._new) return; openNotify(a); },
+  'send-mail': () => { const a = S.db.audits.find(x => x.id === S.draft.id); const ps = people().filter(p => S.draft.sel.includes(p.id));
+    const to = ps.map(p => p.email).filter(Boolean); const miss = ps.filter(p => !p.email).map(p => p.name);
+    if (!ps.length) { toast('Seleziona almeno una persona', true); return; }
+    if (miss.length && !confirm(`Manca l'email di ${miss.join(', ')}: il messaggio partirà senza di loro. Continuare?`)) return;
+    const { subject, body } = emailText(a);
+    window.location.href = `mailto:${to.map(encodeURIComponent).join(',')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const r = clone(a); r.avviso = { data: nowISO(), a: ps.map(p => p.name).join(', ') }; upsert('audits', r, true); persist();
+    closeModal(); render(); toast('Email pronta nel programma di posta'); },
+  'dl-ics': () => { const a = S.db.audits.find(x => x.id === S.draft.id); download(new Blob([icsFor(a)], { type: 'text/calendar;charset=utf-8' }), `Audit ${a.client.replace(/[\\/:*?"<>|]/g, '')}.ics`); },
+  'del-audit': () => { if (!confirm(`Eliminare l'audit di ${S.draft.client}?`)) return; remove('audits', S.draft.id); closeModal(); toast('Audit eliminato'); },
+  'dup-audit': () => { const a = clone(S.draft); a.id = uid(); a._new = true; delete a.updatedAt; delete a.updatedBy;
+    a.days = a.days.map(d => ({ ...d, date: d.date ? addDays(d.date, 364) : '' }));
+    if (['Ricertificazione', 'Certificazione', 'Stage 2', 'Stage 1'].includes(a.tipo)) a.tipo = 'Sorveglianza';
+    a.stato = a.days.length ? 'da_confermare' : 'da_fissare'; a.auditor = ''; delete a.avviso; S.draft = a; renderModal(true); toast('Ipotesi a 12 mesi creata come «da confermare»: controlla e salva'); },
+  // editor certificato
+  'save-cert': () => { const c = S.draft; c.client = (c.client || '').trim().toUpperCase();
+    if (!c.client || !c.norma || !c.scadenza) { toast('Cliente, norma e scadenza sono obbligatori', true); return; }
+    const orig = S.db.certs.find(x => x.id === c.id);
+    if (orig && orig.scadenza !== c.scadenza && c.scadenza >= today()) c.verificare = false;
+    const isNew = c._new; delete c._new; upsert('certs', c); closeModal(); toast(isNew ? 'Certificato creato' : 'Certificato salvato'); },
+  'del-cert': () => { if (!confirm(`Eliminare il certificato ${S.draft.norma} di ${S.draft.client}?`)) return; remove('certs', S.draft.id); closeModal(); toast('Certificato eliminato'); },
+  'renew-draft': () => { S.draft.scadenza = addYears(S.draft.scadenza || today(), 3); S.draft.verificare = false; renderModal(); toast('Scadenza spostata di 3 anni: salva per confermare'); },
+  'plan-draft': () => { const c = S.draft; planFromCert(c); },
+  // clienti
+  'rename-client': () => { const from = S.draft.client, to = (S.draft.newName || '').trim().toUpperCase(); if (!to || to === from) return;
+    const exists = clientList().includes(to);
+    if (!confirm(exists ? `«${to}» esiste già. Unire «${from}» in «${to}»?` : `Rinominare «${from}» in «${to}»?`)) return;
+    for (const a of S.db.audits) if (a.client === from) { a.client = to; upsert('audits', a, true); }
+    for (const c of S.db.certs) if (c.client === from) { c.client = to; upsert('certs', c, true); }
+    persist(); S.draft = { client: to, newName: to }; render(); toast(exists ? 'Clienti uniti' : 'Cliente rinominato'); },
+  // impostazioni
+  'set-user': el => { S.user = el.dataset.p; localStorage.setItem('scad-user', S.user); closeModal(); render(); },
+  'add-list': el => { const k = el.dataset.k, inp = $('#add-' + k), v = inp.value.trim(); if (!v || S.db.settings[k].includes(v)) return; S.db.settings[k].push(v); saveSettings(); },
+  'rm-list': el => { S.db.settings[el.dataset.k].splice(+el.dataset.i, 1); saveSettings(); },
+  'add-person': () => { const v = $('#add-person').value.trim(); if (!v) return; let id = norm(v).toUpperCase().replace(/[^A-Z0-9]/g, '') || 'P'; while (people().some(p => p.id === id)) id += '2';
+    const pal = ['#4f46e5', '#0891b2', '#db2777', '#ea580c', '#16a34a', '#7c3aed', '#ca8a04', '#0d9488', '#dc2626'];
+    S.db.settings.people.push({ id, name: v, color: pal[people().length % pal.length] }); saveSettings(); },
+  'rm-person': el => { const p = people()[+el.dataset.i]; if (!confirm(`Rimuovere ${p.name} dal team? Gli audit già assegnati restano invariati.`)) return; S.db.settings.people.splice(+el.dataset.i, 1); saveSettings(); },
+  'export-json': () => download(new Blob([JSON.stringify(S.db, null, 1)], { type: 'application/json' }), `Scadenzario audit backup ${today()}.json`),
+  'import-json': () => $('#importFile').click(),
+  'export-audits': () => { const rows = [['Cliente', 'Prima data', 'Ultima data', 'Giornate', 'Date', 'Norme', 'Tipo', 'Stato', 'Incarico', 'In presenza', 'Remoto', 'Ente', 'Auditor', 'Note']];
+    for (const a of filteredAudits()) rows.push([a.client, itD(firstDay(a)), itD(lastDay(a)), String(a.days.reduce((s, d) => s + dayLoad(d), 0)).replace('.', ','), a.days.map(d => itD(d.date) + (d.remote ? ' (R)' : '') + (d.half ? ' (½)' : '')).join(', '), (a.norme || []).join(', '), a.tipo, STATI[auditStatus(a)].l, names(a.incarico), names([...new Set(a.days.flatMap(d => d.people || []))]), a.days.some(d => d.remote) ? 'sì' : '', a.ente, a.auditor, a.note]);
+    csv(rows, `Audit ${today()}.csv`); },
+  'export-certs': () => { const rows = [['Cliente', 'Norma', 'Ente', 'N. certificato', 'Scadenza', 'Stato', 'Prossimo audit', 'Referente', 'Note']];
+    for (const c of (S.view === 'certs' ? filteredCerts() : certs())) { const na = nextAuditFor(c.client, c.norma); rows.push([c.client, c.norma, c.ente, c.numero, itD(c.scadenza), CST[certStatus(c)].l, na ? (firstDay(na) ? itD(firstDay(na)) : 'da fissare') : '', names(c.referente), c.note]); }
+    csv(rows, `Certificati ${today()}.csv`); }
+};
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-action]'); if (!el) return;
+  const fn = A[el.dataset.action]; if (fn) fn(el, e);
+});
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.id === 'q') { S.q = t.value; if (S.view === 'dashboard' || S.view === 'settings') { S.view = 'audits'; S.fa.seg = 'tutti'; } render(); return; }
+  if (t.dataset.bind && S.draft && t.type !== 'date' && t.tagName !== 'SELECT' && t.type !== 'checkbox') { setPath(S.draft, t.dataset.bind, t.value); if (t.dataset.liveUp !== undefined) refreshLive(); }
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.dataset.fa !== undefined) { S.fa[t.dataset.fa] = t.value; render(); return; }
+  if (t.dataset.fc !== undefined) { S.fc[t.dataset.fc] = t.value; render(); return; }
+  if (t.id === 'userSel') { S.user = t.value; localStorage.setItem('scad-user', S.user); render(); return; }
+  if (t.id === 'importFile') { const f = t.files[0]; if (!f) return; f.text().then(txt => { try { const d = JSON.parse(txt); if (d.app !== 'scadenzario-audit') throw new Error('file non riconosciuto');
+    if (!confirm(`Importare ${d.audits.length} audit e ${d.certs.length} certificati? Verranno uniti ai dati attuali (vince la versione più recente di ogni record).`)) return;
+    S.db = mergeDB(S.db, d); persist(); render(); toast('Backup importato'); } catch (err) { toast('Importazione non riuscita: ' + err.message, true); } t.value = ''; }); return; }
+  if (t.dataset.personColor !== undefined) { S.db.settings.people[+t.dataset.personColor].color = t.value; saveSettings(); return; }
+  if (t.dataset.personName !== undefined) { const v = t.value.trim(); if (v) { S.db.settings.people[+t.dataset.personName].name = v; saveSettings(); } return; }
+  if (t.dataset.planUntil !== undefined && S.draft) { if (t.value && t.value >= '2000') { S.draft.until = t.value; refreshLive(); } return; }
+  if (t.dataset.notifySel !== undefined && S.draft) { toggle(S.draft.sel, t.dataset.notifySel); return; }
+  if (t.dataset.personEmail !== undefined) { S.db.settings.people[+t.dataset.personEmail].email = t.value.trim(); saveSettings(); return; }
+  if (t.dataset.notifyEmail !== undefined) { const p = people().find(x => x.id === t.dataset.notifyEmail); if (p) { p.email = t.value.trim(); S.db.settings.updatedAt = nowISO(); persist(); } return; }
+  if (t.dataset.studio !== undefined) { S.db.settings.studio = t.value.trim(); saveSettings(); return; }
+  if (t.dataset.addnorma !== undefined && S.draft) { const v = t.value.trim(); if (v && !S.draft.norme.includes(v)) S.draft.norme.push(v); t.value = ''; renderModal(); setTimeout(() => $('[data-addnorma]')?.focus(), 0); return; }
+  if (t.dataset.bind && S.draft) {
+    let v = t.value; if (t.dataset.type === 'bool') v = v === 'true'; if (t.dataset.type === 'check') v = t.checked; if (t.dataset.upper !== undefined) v = v.toUpperCase();
+    setPath(S.draft, t.dataset.bind, v);
+    if (t.dataset.bind === 'stato' && v === 'da_fissare' && S.draft.days?.length && confirm('Rimuovere anche le date inserite?')) S.draft.days = [];
+    if (t.dataset.rerender !== undefined) renderModal();
+    else if (t.dataset.liveUp !== undefined) refreshLive();
+  }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && S.draft && S.draftType !== 'who') closeModal();
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); $('#q').focus(); }
+  if (e.key === 'Enter' && e.target.dataset?.addnorma !== undefined) { e.preventDefault(); e.target.dispatchEvent(new Event('change', { bubbles: true })); }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && S.draft) { const b = document.querySelector('[data-action^="save-"]'); if (b) b.click(); }
+});
+document.addEventListener('dragstart', e => { const el = e.target.closest?.('[data-drag]'); if (!el) return; e.dataTransfer.setData('text/plain', el.dataset.drag); e.dataTransfer.effectAllowed = 'move'; });
+document.addEventListener('dragover', e => { const c = e.target.closest?.('.cell'); if (!c) return; e.preventDefault(); document.querySelectorAll('.cell.drop').forEach(x => x !== c && x.classList.remove('drop')); c.classList.add('drop'); });
+document.addEventListener('dragleave', e => { const c = e.target.closest?.('.cell'); if (c && !c.contains(e.relatedTarget)) c.classList.remove('drop'); });
+document.addEventListener('drop', e => {
+  const c = e.target.closest?.('.cell'); if (!c) return; e.preventDefault(); c.classList.remove('drop');
+  const [id, from] = (e.dataTransfer.getData('text/plain') || '').split('|'); const to = c.dataset.date; if (!id || !to || from === to) return;
+  const a = clone(S.db.audits.find(x => x.id === id)); if (!a) return; const delta = diff(to, from);
+  if (a.stato === 'confermato' && !confirm(`Spostare l'audit confermato di ${a.client}?\nTornerà «da confermare» finché non lo riconfermi.`)) return;
+  a.days = a.days.map(d => ({ ...d, date: addDays(d.date, delta) }));
+  if (a.stato === 'confermato') a.stato = 'da_confermare';
+  upsert('audits', a); toast(`${a.client} spostato: ${fmtDays(a.days)}`);
+});
+window.addEventListener('focus', () => poll());
+document.addEventListener('visibilitychange', () => { if (!document.hidden) poll(); });
+
+/* ================== avvio ================== */
+(async function boot() {
+  let seed = null; try { seed = JSON.parse(document.getElementById('seed').textContent); } catch {}
+  let local = null; try { local = JSON.parse(localStorage.getItem('scad-db') || 'null'); } catch {}
+  S.db = local || seed || { app: 'scadenzario-audit', version: 1, settings: {"studio": "", "people": [], "norme": ["IATF 16949", "ISO 27001", "ISO 13485", "ISO 22000", "ISO 9001", "ISO 14001", "ISO 45001", "EN 1090", "ISO 3834", "SA8000", "UNI/PdR 125", "FSC", "PEFC", "IFS", "GOTS", "GRS", "PED", "FPC calcestruzzo", "CE manufatti", "CE medicale", "DM 188", "FPC", "ISO 50001", "ISO 14021", "BRC", "PEFC CoC", "ISO 19443", "AQAP 2110", "UNI CEI 11352"], "enti": ["Bureau Veritas", "CSI", "CSQA", "Certiquality", "DNV", "Di.Qu.", "ICMQ", "IMQ", "Kiwa", "Quaser", "RINA", "SGS", "SQS", "TÜV"], "tipi": ["Stage 1", "Stage 2", "Certificazione", "Sorveglianza", "Ricertificazione", "Follow-up", "Verifica speciale", "Audit interno", "Altro"], "updatedAt": "", "updatedBy": ""}, audits: [], certs: [] };
+  if (migrate(S.db) && local) persist();
+  if (fsSupported) {
+    const h = await idbGet('dir');
+    if (h) { try { const p = await h.queryPermission({ mode: 'readwrite' }); if (p === 'granted') await openFolder(h); else S.needsReconnect = h; } catch { S.needsReconnect = h; } }
+  }
+  if (S.mode !== 'folder') setSync('local');
+  render(); renderBanner();
+  if (S.needsReconnect) armAutoReconnect();
+  const empty = !S.db.audits.length && !S.db.certs.length && !people().length;
+  if (S.mode !== 'folder' && !S.needsReconnect && empty) { S.draft = {}; S.draftType = 'welcome'; renderModal(true); }
+  else if (people().length && (!S.user || !people().some(p => p.id === S.user))) { S.draft = {}; S.draftType = 'who'; renderModal(true); }
+  if (location.protocol.startsWith('http') && 'serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  setInterval(poll, POLL_MS);
+})();
+</script>
+</body>
+</html>
